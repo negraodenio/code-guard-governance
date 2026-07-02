@@ -33,6 +33,7 @@
     "node-fetch": "^2.7.0",
     "openai": "^6.22.0",
     "pdf-parse": "^2.4.5",
+    "pdfkit": "^0.19.1",
     "react": "^18",
     "react-diff-viewer-continued": "^4.1.2",
     "react-dom": "^18",
