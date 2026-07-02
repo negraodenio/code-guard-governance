@@ -9,7 +9,7 @@ import { hasTenantOrUserAccess } from '@/lib/security/ownership';
 
 
 
-export const maxDuration = 800;
+export const maxDuration = 300;
 
 // v12.0.0 - Scientific Authority Engine
 // Removed legacy stochastic callers. All LLM traffic redirected to centralized provider.
