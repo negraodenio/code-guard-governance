@@ -96,8 +96,8 @@ async function renderPdf(report: Awaited<ReturnType<typeof buildReport>>): Promi
   const PDFDocument = (await import('pdfkit')).default;
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
   const chunks: Buffer[] = [];
-  doc.on('data', (c: Buffer) => chunks.push(c));
-  const done = new Promise<Buffer>(resolve => doc.on('end', () => resolve(Buffer.concat(chunks))));
+  doc.on('data', (c: unknown) => { chunks.push(c as Buffer); });
+  const done = new Promise<Buffer>(resolve => doc.on('end', () => { resolve(Buffer.concat(chunks)); }));
 
   // Header
   doc.fontSize(18).fillColor('#0ECFB8').text('CODEGUARD', { continued: true }).fillColor('#333').text(' AI GOVERNANCE OS');
