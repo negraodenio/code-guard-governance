@@ -8,6 +8,7 @@ import { runScan, getKnownTargets } from '@/services/scan-service';
 // Auth: Authorization: Bearer <CRON_SECRET> (when configured)
 // ─────────────────────────────────────────────────────────────────────────────
 
+export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 min — scans are slow
 
 export async function GET(req: NextRequest) {
