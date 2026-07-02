@@ -1,0 +1,19 @@
+{
+  "name": "council-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "typecheck:graphos": "tsc --noEmit -p graphos-complete/tsconfig.json",
+    "typecheck:dashboard": "tsc --noEmit -p apps/dashboard/tsconfig.json",
+    "typecheck:scanner": "tsc --noEmit -p packages/scanner/tsconfig.json",
+    "typecheck:graphos-pkg": "tsc --noEmit -p packages/graphos/tsconfig.json",
+    "test:graphos": "cd graphos-complete && npx jest --config jest.config.js"
+  },
+  "engines": {
+    "node": "20.x"
+  }
+}

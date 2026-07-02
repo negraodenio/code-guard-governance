@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>CodeGuard AI v1.2.0 | From Code to Compliance in One Command</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="apple-touch-icon" href="favicon.png" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#8b5cf6",
+                        "emerald-accent": "#10b981",
+                        "background-dark": "#020617",
+                        "card-dark": "#0f172a",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .gradient-text { background: linear-gradient(135deg, #fff 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-glow { position: absolute; top: -10%; left: 50%; transform: translateX(-50%); width: 80%; height: 60%; background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%); filter: blur(80px); pointer-events: none; z-index: 0; }
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+    </style>
+
+</head>
+
+
+<body class="bg-background-dark text-slate-100 font-display selection:bg-primary/30">
+    <div class="hero-glow"></div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 w-full glass border-b border-white/5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="window.location.href='index.html'">
+                <div class="bg-primary rounded-lg p-1.5 flex items-center justify-center shadow-lg shadow-primary/25">
+                    <svg xmlns="http://www.w3.org/2001/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><rect width="8" height="5" x="8" y="11" rx="1"/><path d="M12 11v1"/></svg>
+                </div>
+                <h2 class="text-white text-xl font-black tracking-tighter">CodeGuard<span class="text-primary">AI</span></h2>
+
+                <span class="ml-2 px-2 py-0.5 bg-primary/10 border border-primary/20 rounded text-[10px] font-bold text-primary uppercase">v1.2.0</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                <a href="#features" class="hover:text-primary transition-colors">Features</a>
+                <a href="#frameworks" class="hover:text-primary transition-colors">Frameworks</a>
+                <a href="#mcp" class="hover:text-primary transition-colors">Agents</a>
+                <a href="#pricing" class="hover:text-primary transition-colors">Pricing</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="window.location.href='dashboard.html'" class="hidden sm:block text-sm font-bold text-slate-300 hover:text-white transition-colors">Log In</button>
+                <button onclick="window.location.href='dashboard.html'" class="bg-primary hover:bg-primary/90 text-white text-sm font-bold py-2.5 px-6 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-primary/25">
+                    Start Trial
+                </button>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- Hero Section -->
+    <header class="relative pt-20 pb-16 px-6 text-center max-w-5xl mx-auto z-10">
+        <div class="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-8 animate-fade-in">
+            <span class="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+            <span class="text-primary text-[10px] font-black uppercase tracking-widest leading-none">Enterprise Dashboard Now Live</span>
+        </div>
+        <h1 class="text-5xl md:text-7xl font-black gradient-text leading-[1.05] tracking-tight mb-8">
+            From Code to Compliance<br>In One Command.
+        </h1>
+        <p class="text-slate-400 text-lg md:text-xl font-medium leading-relaxed max-w-3xl mx-auto mb-10">
+            Developers hate audits. DPOs hate reading git logs. 
+            <span class="text-white">CodeGuard v1.2.0</span> bridges the gap with automated Technical Evidence Reports across 9+ global frameworks.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button onclick="window.location.href='dashboard.html'" class="w-full sm:w-auto bg-primary text-white font-black py-4 px-10 rounded-2xl shadow-xl shadow-primary/30 hover:shadow-primary/40 transition-all hover:-translate-y-1 flex items-center justify-center gap-2">
+                Deploy Now
+                <svg xmlns="http://www.w3.org/2001/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+            <button onclick="window.location.href='dashboard.html'" class="w-full sm:w-auto glass hover:bg-white/5 text-white font-bold py-4 px-10 rounded-2xl transition-all flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2001/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                See Dashboard
+            </button>
+
+        </div>
+
+        <!-- Logos -->
+        <div class="mt-20 opacity-40 flex flex-wrap justify-center gap-12 grayscale brightness-200">
+            <img src="https://cdn.worldvectorlogo.com/logos/vercel.svg" class="h-6 invert" alt="Vercel">
+            <img src="https://cdn.worldvectorlogo.com/logos/github-icon-1.svg" class="h-6 invert" alt="GitHub">
+            <img src="https://cdn.worldvectorlogo.com/logos/visual-studio-code-1.svg" class="h-6" alt="VS Code">
+            <img src="https://cdn.worldvectorlogo.com/logos/slack-new-logo.svg" class="h-6" alt="Slack">
+        </div>
+
+    </header>
+
+    <!-- Main Visuals: Dashboard + Triple Play -->
+    <section class="max-w-7xl mx-auto px-6 py-20" id="features">
+        <div class="grid lg:grid-cols-2 gap-12 items-center mb-32">
+            <div>
+                <h2 class="text-3xl md:text-4xl font-black mb-6 leading-tight uppercase">Technical Evidence Reports<br><span class="text-primary italic">Auditors Love Us.</span></h2>
+                <div class="space-y-8">
+                    <div class="flex gap-5">
+                        <div class="w-12 h-12 rounded-2xl glass flex items-center justify-center text-primary shrink-0 shadow-lg">
+                            <svg xmlns="http://www.w3.org/2001/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">Automated Data Processing Records</h4>
+                            <p class="text-slate-400 leading-relaxed">Stop manually documenting API flows. One command generates audit-ready PDFs satisfying <strong>GDPR Art. 30</strong> and <strong>LGPD</strong> requirements.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-5">
+                        <div class="w-12 h-12 rounded-2xl glass flex items-center justify-center text-emerald-accent shrink-0 shadow-lg">
+                            <svg xmlns="http://www.w3.org/2001/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">Immutable Git-SHA Evidence</h4>
+                            <p class="text-slate-400 leading-relaxed">Every compliance fix is cryptographically linked to your git history. Show auditors exactly when and how a violation was remediated.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="relative group">
+                <div class="absolute -inset-4 bg-primary/20 blur-3xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+                <img src="codeguard_enterprise_dashboard_1776795226536.png" class="relative rounded-3xl border border-white/10 shadow-2xl transition-transform group-hover:scale-[1.02]" alt="CodeGuard Enterprise Dashboard">
+                <div class="absolute -bottom-6 -right-6 p-1 glass rounded-2xl shadow-2xl">
+                    <img src="codeguard_audit_report_1776795244790.png" class="w-48 rounded-xl" alt="Audit Report Evidence">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- The Triple Play -->
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-black mb-4">One Engine. <span class="text-primary">Three Entry Points.</span></h2>
+            <p class="text-slate-400 max-w-2xl mx-auto">Ship fast without breaking legal requirements. Secure your entire SDLC across our universal interfaces.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="glass p-8 rounded-3xl hover:border-primary/50 transition-all group">
+                <svg xmlns="http://www.w3.org/2001/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500 mb-6 group-hover:scale-110 transition-transform"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
+                <h3 class="text-xl font-black mb-3">1. IDE Extension</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">Real-time scanning and <strong>AI Auto-fixes</strong> directly in VS Code, Cursor, and WindSurf. Block violations before the first commit.</p>
+            </div>
+            <div class="glass p-8 rounded-3xl hover:border-primary/50 transition-all group">
+                <svg xmlns="http://www.w3.org/2001/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary mb-6 group-hover:scale-110 transition-transform"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                <h3 class="text-xl font-black mb-3">2. Universal MCP</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">Give your AI Agents a <strong>Compliance Brain</strong>. Connect Claude or Cursor to your codebase via Model Context Protocol for legal queries.</p>
+            </div>
+            <div class="glass p-8 rounded-3xl hover:border-primary/50 transition-all group">
+                <svg xmlns="http://www.w3.org/2001/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-accent mb-6 group-hover:scale-110 transition-transform"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+                <h3 class="text-xl font-black mb-3">3. REST API & CLI</h3>
+                <p class="text-sm text-slate-400 leading-relaxed">The backbone for <strong>CI/CD Pipelines</strong>. High-volume reporting, shadow API detection, and evidence export for auditors.</p>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Global Regulatory Coverage -->
+    <section class="bg-card-dark py-24 px-6 border-y border-white/5" id="frameworks">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row items-end justify-between gap-8 mb-16">
+                <div class="max-w-2xl">
+                    <h2 class="text-4xl font-black mb-4 uppercase leading-tight">Global Regulatory Coverage<br><span class="text-primary">One Engine, 9+ Frameworks.</span></h2>
+                    <p class="text-slate-400">From the rigorous EU AI Act to localized BR/LATAM cybersecurity rules. We've mapped the tech evidence you need.</p>
+                </div>
+                <button class="glass py-4 px-8 rounded-2xl font-bold hover:bg-white/5 transition-all flex items-center gap-2">
+                    View Full Mapping
+                    <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+                </button>
+
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Europe -->
+                <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
+                    <span class="text-2xl mb-4 block">🇪🇺</span>
+                    <h4 class="font-black text-slate-400 text-xs uppercase mb-4 tracking-widest">Europe (EMEA)</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="text-white font-bold text-sm">EU AI Act <span class="text-primary text-[10px] uppercase ml-1">Critical</span></div>
+                            <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">High-risk governance, data lineage, bias detection.</p>
+                        </div>
+                        <div>
+                            <div class="text-white font-bold text-sm">GDPR</div>
+                            <p class="text-[11px] text-slate-500 mt-1">Privacy by Design, PII detection, records of processing.</p>
+                        </div>
+                        <div>
+                            <div class="text-white font-bold text-sm">DORA</div>
+                            <p class="text-[11px] text-slate-500 mt-1">Operational resilience for Banking/Fintech.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Brazil -->
+                <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
+                    <span class="text-2xl mb-4 block">🇧🇷</span>
+                    <h4 class="font-black text-slate-400 text-xs uppercase mb-4 tracking-widest">Brazil (LATAM)</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="text-white font-bold text-sm">LGPD</div>
+                            <p class="text-[11px] text-slate-500 mt-1">Data minimization, privacy controls, ANPD-ready evidence.</p>
+                        </div>
+                        <div>
+                            <div class="text-white font-bold text-sm">BACEN 4.893</div>
+                            <p class="text-[11px] text-slate-500 mt-1">Cybersecurity standards for Financial Institutions.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- US -->
+                <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
+                    <span class="text-2xl mb-4 block">🇺🇸</span>
+                    <h4 class="font-black text-slate-400 text-xs uppercase mb-4 tracking-widest">United States</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="text-white font-bold text-sm">CCPA/CPRA</div>
+                            <p class="text-[11px] text-slate-500 mt-1">Consumer rights, "Do Not Sell" tech enforcement hooks.</p>
+                        </div>
+                        <div>
+                            <div class="text-white font-bold text-sm">HIPAA</div>
+                            <p class="text-[11px] text-slate-500 mt-1">PHI protection validation for modern HealthTech stacks.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Global -->
+                <div class="bg-white/5 p-6 rounded-2xl border border-white/5">
+                    <span class="text-2xl mb-4 block">🌐</span>
+                    <h4 class="font-black text-slate-400 text-xs uppercase mb-4 tracking-widest">Global Standards</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="text-white font-bold text-sm">PCI-DSS</div>
+                            <p class="text-[11px] text-slate-500 mt-1">Scanning for payment data leaks (PANs) in code.</p>
+                        </div>
+                        <div>
+                            <div class="text-white font-bold text-sm">ISO 27001</div>
+                            <p class="text-[11px] text-slate-500 mt-1">Technical evidence generation for security management.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MCP Section (NEW CONTENT) -->
+    <section class="max-w-4xl mx-auto px-6 py-32" id="mcp">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-black mb-6 uppercase tracking-tight">Give Your AI Agents<br><span class="text-primary">A Compliance Brain.</span></h2>
+            <p class="text-slate-400 md:text-lg max-w-2xl mx-auto leading-relaxed italic">"Find all GDPR violations in the auth module" — Ask natural language questions to your codebase via Model Context Protocol.</p>
+        </div>
+
+        <div class="glass p-2 rounded-[2rem] border-white/10 shadow-2xl relative overflow-hidden group">
+            <div class="bg-slate-950 rounded-[1.8rem] overflow-hidden">
+                <div class="bg-white/5 border-b border-white/5 px-6 py-3 flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Claude Desktop Configuration</span>
+                    <div class="flex gap-1.5">
+                        <div class="w-2 h-2 rounded-full bg-red-500/30"></div>
+                        <div class="w-2 h-2 rounded-full bg-yellow-500/30"></div>
+                        <div class="w-2 h-2 rounded-full bg-green-500/30"></div>
+                    </div>
+                </div>
+                <div class="p-8 font-mono text-sm leading-relaxed text-indigo-300">
+                    <pre><code>{
+  <span class="text-white font-bold">"mcpServers"</span>: {
+    <span class="text-white font-bold">"codeguard"</span>: {
+      <span class="text-primary">"command"</span>: <span class="text-emerald-accent">"npx"</span>,
+      <span class="text-primary">"args"</span>: [<span class="text-emerald-accent">"codeguard-ai"</span>, <span class="text-emerald-accent">"mcp"</span>]
+    }
+  }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-8 mt-12 text-center opacity-60">
+            <div class="p-4">
+                <svg xmlns="http://www.w3.org/2001/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary mb-3 mx-auto"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+                <p class="text-xs font-bold leading-relaxed px-2 uppercase">Verified Evidence Generation</p>
+            </div>
+            <div class="p-4">
+                <svg xmlns="http://www.w3.org/2001/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary mb-3 mx-auto"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                <p class="text-xs font-bold leading-relaxed px-2 uppercase">Cross-Repo Visibility</p>
+            </div>
+            <div class="p-4">
+                <svg xmlns="http://www.w3.org/2001/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary mb-3 mx-auto"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <p class="text-xs font-bold leading-relaxed px-2 uppercase">Automatic Privacy Guardrails</p>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="max-w-7xl mx-auto px-6 py-32 border-t border-white/5" id="pricing">
+        <div class="text-center mb-20">
+            <h2 class="text-5xl font-black mb-4 uppercase">Choose Your Compliance Level.</h2>
+            <p class="text-slate-400">Scale from local scanning to global governance.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Developer -->
+            <div class="glass p-10 rounded-[3rem] flex flex-col hover:border-white/20 transition-all">
+                <h4 class="text-xl font-bold mb-2">Developer</h4>
+                <p class="text-slate-500 text-sm mb-6">For individual specialists.</p>
+                <div class="text-4xl font-black mb-8 leading-none">$0<span class="text-sm font-medium text-slate-500"> /mo</span></div>
+                <ul class="space-y-4 mb-12 flex-1">
+                    <li class="flex items-start gap-3 text-sm">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-accent"><polyline points="20 6 9 17 4 12"/></svg>
+                        Unlimited Local Scans
+                    </li>
+
+                    <li class="flex items-start gap-3 text-sm">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-accent"><polyline points="20 6 9 17 4 12"/></svg>
+                        VS Code Extension
+                    </li>
+
+                    <li class="flex items-start gap-3 text-sm">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-accent"><polyline points="20 6 9 17 4 12"/></svg>
+                        9 Global Frameworks
+                    </li>
+
+                    <li class="flex items-start gap-3 text-sm text-slate-600">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-slate-700"><circle cx="12" cy="12" r="10"/><line x1="4.93" x2="19.07" y1="4.93" y2="19.07"/></svg>
+                        <span class="line-through">PDF Audit Reports</span>
+                    </li>
+
+                </ul>
+                <button class="w-full glass py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white/5">npm install -g</button>
+            </div>
+
+            <!-- Pro -->
+            <div class="bg-primary/10 border-2 border-primary p-10 rounded-[3rem] flex flex-col relative shadow-2xl shadow-primary/20 scale-105 z-10">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-lg shadow-primary/30">MOST POPULAR</div>
+                <h4 class="text-xl text-white font-bold mb-2">Pro</h4>
+                <p class="text-primary/70 text-sm mb-6">For tech leads and teams.</p>
+                <div class="text-4xl text-white font-black mb-8 leading-none">€79<span class="text-sm font-medium text-slate-500"> /mo</span></div>
+                <ul class="space-y-4 mb-12 flex-1 text-slate-300">
+                    <li class="flex items-start gap-3 text-sm">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><polyline points="20 6 9 17 4 12"/></svg>
+                        <strong>Everything in Developer</strong>
+                    </li>
+
+                    <li class="flex items-start gap-3 text-sm">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><polyline points="20 6 9 17 4 12"/></svg>
+                        CI/CD Blocking (Exit 1)
+                    </li>
+
+                    <li class="flex items-start gap-3 text-sm">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><polyline points="20 6 9 17 4 12"/></svg>
+                        Unlimited AI Auto-fixes
+                    </li>
+
+                    <li class="flex items-start gap-3 text-sm">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><polyline points="20 6 9 17 4 12"/></svg>
+                        1 Professional Evidence Report /mo
+                    </li>
+
+                </ul>
+                <button onclick="window.location.href='dashboard.html'" class="w-full bg-primary py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-primary/90 shadow-lg shadow-primary/30">Start Pro Trial</button>
+            </div>
+
+            <!-- Enterprise -->
+            <div class="glass p-10 rounded-[3rem] flex flex-col">
+                <h4 class="text-xl font-bold mb-2">Enterprise</h4>
+                <p class="text-slate-500 text-sm mb-6">For regulated industries.</p>
+                <div class="text-4xl font-black mb-8 leading-none italic uppercase">Custom</div>
+                <ul class="space-y-4 mb-12 flex-1">
+                    <li class="flex items-start gap-3 text-sm">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><polyline points="20 6 9 17 4 12"/></svg>
+                        <strong>Compliance Control Center</strong>
+                    </li>
+
+                    <li class="flex items-start gap-3 text-sm">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><polyline points="20 6 9 17 4 12"/></svg>
+                        Unlimited Audit Reports
+                    </li>
+
+                    <li class="flex items-start gap-3 text-sm">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><polyline points="20 6 9 17 4 12"/></svg>
+                        Air-gapped deployment option
+                    </li>
+
+                    <li class="flex items-start gap-3 text-sm">
+                        <svg xmlns="http://www.w3.org/2001/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400"><polyline points="20 6 9 17 4 12"/></svg>
+                        SSO & Forensic Audit Trail
+                    </li>
+
+                </ul>
+                <button onclick="document.getElementById('contact-form').scrollIntoView({behavior: 'smooth'})" class="w-full glass py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white/5">Contact Sales</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="max-w-7xl mx-auto px-6 py-32 text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-primary/5 blur-3xl rounded-full"></div>
+        <div class="relative z-10">
+            <h2 class="text-5xl font-black mb-6 tracking-tighter leading-none">Ready to Automate Compliance?</h2>
+            <p class="text-slate-400 text-lg mb-12 max-w-xl mx-auto">Get a technical audit or discuss Enterprise deployment today.</p>
+            
+            <form id="contact-form" class="max-w-md mx-auto space-y-4" action="https://formspree.io/f/xgooljwn" method="POST">
+                <input type="email" name="email" placeholder="Work Email" class="w-full glass py-4 px-6 rounded-2xl border-white/10 text-sm focus:border-primary transition-all focus:ring-1 focus:ring-primary outline-none" required>
+                <button type="submit" class="w-full bg-primary py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl shadow-primary/40 hover:scale-[1.02] active:scale-[0.98] transition-all">Request Technical Demo</button>
+            </form>
+            <p class="mt-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">CodeGuard AI Bridge: DevSecOps and Legal Compliance</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto px-6 py-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="flex items-center gap-2 grayscale brightness-200">
+            <div class="bg-primary/20 rounded-lg p-1.5 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2001/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><rect width="8" height="5" x="8" y="11" rx="1"/><path d="M12 11v1"/></svg>
+            </div>
+            <h2 class="text-white text-sm font-black tracking-tighter">CodeGuard<span class="text-slate-400">AI</span></h2>
+        </div>
+
+        <div class="flex gap-8 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            <a href="privacy.html" class="hover:text-white transition-colors">Privacy</a>
+            <a href="terms.html" class="hover:text-white transition-colors">Terms</a>
+            <a href="terms.html" class="hover:text-white transition-colors">Audit Policy</a>
+        </div>
+
+        <p class="text-[10px] text-slate-600 font-bold uppercase tracking-widest">© 2026 CodeGuard AI. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

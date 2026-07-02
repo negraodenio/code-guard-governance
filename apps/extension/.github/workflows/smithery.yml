@@ -1,0 +1,40 @@
+name: Publish to Smithery
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'smithery.yaml'
+
+jobs:
+  smithery:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run compile
+
+      - name: Publish to Smithery
+        uses: smithery-ai/cli@v1
+        with:
+          command: publish
+          # Note: Since you are deploying via URL (GitHub), this action is mainly for validation 
+          # and ensuring usage of the latest cli version for checks.
+          # For actual hosting, Smithery pulls from GitHub directly.
+          # However, running 'publish' here ensures your 'smithery.yaml' is always valid.
+          smithery-token: ${{ secrets.SMITHERY_API_KEY }}
+        continue-on-error: true # Don't break CI if Smithery API key is missing

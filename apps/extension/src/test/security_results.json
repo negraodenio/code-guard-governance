@@ -1,0 +1,58 @@
+{
+  "timestamp": "2026-01-28T17:13:07.620Z",
+  "totalTests": 10,
+  "vulnerabilities": 2,
+  "protected": 8,
+  "details": [
+    {
+      "name": "Negative Credit Injection",
+      "vulnerable": false,
+      "details": "Blocked. Balance: 0"
+    },
+    {
+      "name": "SQL Injection via Email",
+      "vulnerable": false,
+      "details": "Victim balance after attack: 100 (should be 100)"
+    },
+    {
+      "name": "Cross-User Credit Theft",
+      "vulnerable": true,
+      "details": "Theft succeeded. Victim balance: 50"
+    },
+    {
+      "name": "Direct Table Manipulation",
+      "vulnerable": false,
+      "details": "Insert error: PGRST204, Update error: PGRST204, Balance: 0"
+    },
+    {
+      "name": "Race Condition (Double Spending)",
+      "vulnerable": false,
+      "details": "10/100 succeeded. Final balance: 0 (should be 0, not negative)"
+    },
+    {
+      "name": "Floating Point Exploitation",
+      "vulnerable": false,
+      "details": "Used 0.0001, result: null, balance: 5 -> 5"
+    },
+    {
+      "name": "Zero Credit Usage",
+      "vulnerable": false,
+      "details": "use_credits(0) returned: false (should be false)"
+    },
+    {
+      "name": "Integer Overflow",
+      "vulnerable": false,
+      "details": "Used MAX_INT, balance: 5"
+    },
+    {
+      "name": "NULL Email Injection",
+      "vulnerable": false,
+      "details": "Returned: false"
+    },
+    {
+      "name": "Audit Log Tampering",
+      "vulnerable": true,
+      "details": "Delete: no error returned, Update: no error returned (Note: RLS may block silently with no error, check count instead)"
+    }
+  ]
+}

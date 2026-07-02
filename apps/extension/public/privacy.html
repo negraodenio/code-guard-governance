@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - CodeGuard AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #6366f1, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .updated {
+            color: #94a3b8;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            color: #10b981;
+            margin: 32px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #334155;
+        }
+
+        p,
+        li {
+            color: #cbd5e1;
+            margin-bottom: 12px;
+        }
+
+        ul {
+            padding-left: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+
+        th {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .highlight {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid #10b981;
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        .no-collect {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #ef4444;
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid #334155;
+            text-align: center;
+            color: #64748b;
+        }
+
+        a {
+            color: #10b981;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            margin: 4px;
+        }
+
+        .gdpr {
+            background: #1e40af;
+            color: #93c5fd;
+        }
+
+        .lgpd {
+            background: #065f46;
+            color: #6ee7b7;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo" style="cursor: pointer;" onclick="window.location.href='index.html'">
+            <div class="logo-icon">🛡️</div>
+            <span class="logo-text">CodeGuard AI</span>
+        </div>
+
+        <h1>Privacy Policy</h1>
+        <p class="updated">Last Updated: January 2026</p>
+        <p>
+            <span class="badge gdpr">GDPR Compliant</span>
+            <span class="badge lgpd">LGPD Compliant</span>
+        </p>
+
+        <h2>1. Data Controller</h2>
+        <p>CodeGuard Technologies<br>Email: <a href="mailto:privacy@code-guard.eu">privacy@code-guard.eu</a></p>
+
+        <h2>2. Data We Collect</h2>
+        <table>
+            <tr>
+                <th>Data</th>
+                <th>Purpose</th>
+                <th>Retention</th>
+            </tr>
+            <tr>
+                <td>Email address</td>
+                <td>Account identification</td>
+                <td>Until deletion</td>
+            </tr>
+            <tr>
+                <td>Payment info</td>
+                <td>Processed by Stripe</td>
+                <td>We don't store</td>
+            </tr>
+            <tr>
+                <td>Usage metrics</td>
+                <td>Credit counting</td>
+                <td>24 months</td>
+            </tr>
+        </table>
+
+        <h2>3. Data We DO NOT Collect</h2>
+        <div class="highlight no-collect">
+            <p>❌ <strong>Your source code is NOT sent to our servers</strong></p>
+            <p>❌ Code scans run locally in your editor</p>
+            <p>❌ We do not access your Git repositories</p>
+        </div>
+
+        <h2>4. AI Processing</h2>
+        <p>When you use AI Fixes:</p>
+        <ul>
+            <li><strong>Only the specific code snippet</strong> is sent for processing</li>
+            <li>Processed via secure API (OpenRouter/OpenAI)</li>
+            <li>Code is <strong>NOT stored</strong> after processing</li>
+        </ul>
+
+        <h2>5. Your Rights (GDPR/LGPD)</h2>
+        <div class="highlight">
+            <p>You have the right to:</p>
+            <ul>
+                <li>✅ <strong>Access</strong> your data</li>
+                <li>✅ <strong>Correct</strong> inaccurate data</li>
+                <li>✅ <strong>Delete</strong> your account</li>
+                <li>✅ <strong>Export</strong> your data</li>
+                <li>✅ <strong>Object</strong> to processing</li>
+            </ul>
+            <p>To exercise: <a href="mailto:privacy@codeguard.dev">privacy@codeguard.dev</a></p>
+        </div>
+
+        <h2>6. Data Security</h2>
+        <ul>
+            <li>🔒 All data encrypted in transit (TLS 1.3)</li>
+            <li>🔐 Database on Supabase (SOC 2 compliant)</li>
+            <li>💳 Payments via Stripe (PCI DSS Level 1)</li>
+        </ul>
+
+        <h2>7. Third-Party Services</h2>
+        <table>
+            <tr>
+                <th>Service</th>
+                <th>Purpose</th>
+            </tr>
+            <tr>
+                <td>Stripe</td>
+                <td>Payment processing</td>
+            </tr>
+            <tr>
+                <td>Supabase</td>
+                <td>Database</td>
+            </tr>
+            <tr>
+                <td>OpenRouter/OpenAI</td>
+                <td>AI Processing</td>
+            </tr>
+        </table>
+
+        <h2>8. Contact</h2>
+        <p>📧 Privacy inquiries: <a href="mailto:privacy@codeguard.dev">privacy@codeguard.dev</a></p>
+
+        <div class="footer">
+            <p>© 2026 CodeGuard AI. All rights reserved.</p>
+            <p><a href="terms.html">Terms of Service</a> | <a href="index.html">Back to Home</a></p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,36 @@
+﻿{
+    "functions": {
+        "src/app/api/scanner/discover/route.ts": {
+            "maxDuration": 300
+        },
+        "src/app/api/session/start/route.ts": {
+            "maxDuration": 300
+        },
+        "src/app/api/session/worker/route.ts": {
+            "maxDuration": 300
+        },
+        "src/app/api/chamber/stream/route.ts": {
+            "maxDuration": 300
+        },
+        "src/app/api/chamber/interject/route.ts": {
+            "maxDuration": 300
+        },
+        "src/app/api/v1/graph/route.ts": {
+            "maxDuration": 300
+        },
+        "src/app/api/v1/webhook/github/route.ts": {
+            "maxDuration": 300
+        },
+        "src/app/api/v1/cron/rescan/route.ts": {
+            "maxDuration": 300
+        }
+    },
+    "crons": [
+        {
+            "path": "/api/v1/cron/rescan",
+            "schedule": "0 6 * * *"
+        }
+    ],
+    "installCommand": "npm install",
+    "framework": "nextjs"
+}

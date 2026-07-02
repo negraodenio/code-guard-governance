@@ -1,0 +1,269 @@
+import PDFDocument from "pdfkit";
+import type { ReportData } from "@/repositories/reports";
+
+export function generateExecutiveReport(data: ReportData): Uint8Array {
+  const doc = new PDFDocument({ margin: 50, size: "A4" });
+  const chunks: Buffer[] = [];
+  doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+
+  const left = 50;
+  const right = 545;
+  let y = 50;
+
+  function hr() {
+    y += 6;
+    doc.moveTo(left, y).lineTo(right, y).stroke("#232948");
+    y += 12;
+  }
+
+  function heading(text: string, size: number = 14) {
+    y += 8;
+    doc.fontSize(size).font("Helvetica-Bold").fillColor("#ffffff").text(text, left, y);
+    y += size + 8;
+  }
+
+  function row(label: string, value: string, labelW: number = 200) {
+    doc.fontSize(10).font("Helvetica").fillColor("#9ca3af").text(label, left, y, { width: labelW, continued: true });
+    doc.fillColor("#ffffff").text(value);
+    y += 18;
+  }
+
+  function tableRow(cols: string[], widths: number[], isHeader: boolean = false) {
+    let x = left;
+    doc.fontSize(9).font(isHeader ? "Helvetica-Bold" : "Helvetica").fillColor(isHeader ? "#9ca3af" : "#ffffff");
+    for (let i = 0; i < cols.length; i++) {
+      doc.text(cols[i], x, y, { width: widths[i] });
+      x += widths[i];
+    }
+    y += 16;
+    if (isHeader) y += 4;
+  }
+
+  // ─── HEADER ───
+  doc.fontSize(20).font("Helvetica-Bold").fillColor("#1337ec").text("Executive Governance Report", left, y);
+  y += 28;
+  doc.fontSize(10).font("Helvetica").fillColor("#9ca3af").text(`${data.org.name} · ${data.org.date}`, left, y);
+  y += 6;
+  doc.fillColor("#9ca3af").text(`Industry: ${data.org.industry} · CodeGuard AI Governance OS`, left, y);
+  y += 20;
+  hr();
+
+  // ─── ESTATE ───
+  heading("1. AI Estate Overview");
+  row("Total AI Agents", String(data.agents.total));
+  row("Total AI Systems", String(data.systems.total));
+  row("Compliance Rate", `${data.compliance.rate}%`);
+  y += 6;
+
+  heading("Risk Distribution", 12);
+  const maxRisk = Math.max(data.agents.byRisk.critical, data.agents.byRisk.high, data.agents.byRisk.medium, data.agents.byRisk.low, 1);
+  const risks: Array<{ label: string; value: number; color: string }> = [
+    { label: "Critical", value: data.agents.byRisk.critical, color: "#ef4444" },
+    { label: "High", value: data.agents.byRisk.high, color: "#f97316" },
+    { label: "Medium", value: data.agents.byRisk.medium, color: "#f59e0b" },
+    { label: "Low", value: data.agents.byRisk.low, color: "#10b981" },
+  ];
+  for (const r of risks) {
+    const w = Math.max((r.value / maxRisk) * 300, 4);
+    doc.fontSize(9).font("Helvetica").fillColor("#9ca3af").text(r.label, left, y, { width: 60, continued: true });
+    doc.rect(left + 60, y, w, 10).fill(r.color);
+    doc.fontSize(9).fillColor("#ffffff").text(String(r.value), left + 66 + w, y);
+    y += 16;
+  }
+  y += 8;
+  hr();
+
+  // ─── COMPLIANCE ───
+  heading("2. Compliance Status");
+  row("Total Governance Gaps", String(data.compliance.totalGaps));
+  row("Open Findings", String(data.findings.open));
+
+  if (data.compliance.topGaps.length > 0) {
+    y += 4;
+    doc.fontSize(11).font("Helvetica-Bold").fillColor("#ffffff").text("Top Compliance Gaps", left, y);
+    y += 16;
+    tableRow(["Agent", "Gaps", "Risk"], [250, 80, 80], true);
+    for (const g of data.compliance.topGaps) {
+      tableRow([g.agent, String(g.gaps), g.risk], [250, 80, 80]);
+    }
+  }
+  y += 4;
+  hr();
+
+  // ─── INCIDENTS ───
+  heading("3. Incidents");
+  row("Open Incidents", String(data.incidents.open));
+  row("DORA Open", String(data.incidents.doraOpen));
+
+  if (data.incidents.recent.length > 0) {
+    y += 4;
+    doc.fontSize(11).font("Helvetica-Bold").fillColor("#ffffff").text("Recent Incidents", left, y);
+    y += 16;
+    tableRow(["Code", "Title", "Severity", "Status"], [80, 220, 80, 80], true);
+    for (const inc of data.incidents.recent) {
+      tableRow([inc.code, inc.title.slice(0, 40), inc.severity, inc.status], [80, 220, 80, 80]);
+    }
+  }
+  y += 4;
+  hr();
+
+  // ─── AI ACT ───
+  heading("4. AI Act Exposure");
+  row("High-Risk Systems", String(data.aiAct.highRiskSystems));
+  row("Agents Without System", String(data.aiAct.agentsWithoutSystem));
+
+  if (data.systems.byLifecycle.length > 0) {
+    y += 4;
+    doc.fontSize(11).font("Helvetica-Bold").fillColor("#ffffff").text("System Lifecycle", left, y);
+    y += 14;
+    for (const l of data.systems.byLifecycle) {
+      row(l.lifecycle, String(l.count));
+    }
+  }
+
+  // ─── DORA ───
+  if (data.org.industry === "financial_services" || data.org.industry === "insurance") {
+    y += 4;
+    hr();
+    heading("5. DORA Status");
+    row("Total DORA Incidents", String(data.dora.totalIncidents));
+    row("Major Incidents", String(data.dora.majorIncidents));
+    row("Reporting Status", data.dora.reportingStatus);
+  }
+
+  // ─── FOOTER ───
+  y += 20;
+  hr();
+  doc.fontSize(8).font("Helvetica").fillColor("#4b5563").text(
+    `Generated by CodeGuard AI Governance OS · ${new Date().toISOString()}`,
+    left, y
+  );
+
+  doc.end();
+  return Buffer.concat(chunks);
+}
+
+export function generateAIActReport(data: ReportData): Uint8Array {
+  const doc = new PDFDocument({ margin: 50, size: "A4" });
+  const chunks: Buffer[] = [];
+  doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+
+  let y = 50;
+  const left = 50;
+  const right = 545;
+
+  function hr() { y += 6; doc.moveTo(left, y).lineTo(right, y).stroke("#232948"); y += 12; }
+  function heading(text: string, size: number = 14) { y += 8; doc.fontSize(size).font("Helvetica-Bold").fillColor("#ffffff").text(text, left, y); y += size + 8; }
+  function row(label: string, value: string) { doc.fontSize(10).font("Helvetica").fillColor("#9ca3af").text(label, left, y, { width: 250, continued: true }); doc.fillColor("#ffffff").text(value); y += 18; }
+
+  doc.fontSize(18).font("Helvetica-Bold").fillColor("#1337ec").text("AI Act Compliance Report", left, y);
+  y += 26;
+  doc.fontSize(10).font("Helvetica").fillColor("#9ca3af").text(`${data.org.name} · ${data.org.date}`, left, y);
+  y += 6;
+  doc.fillColor("#9ca3af").text(`EU AI Act 2024/1689 — High-Risk Systems (Annex III)`, left, y);
+  y += 20;
+  hr();
+
+  heading("1. AI Systems Inventory");
+  row("Total Systems", String(data.systems.total));
+  row("High-Risk Systems", String(data.aiAct.highRiskSystems));
+  row("Agents Without AI System", String(data.aiAct.agentsWithoutSystem));
+  y += 8;
+
+  heading("2. Human Oversight");
+  for (const o of data.aiAct.oversightLevels) {
+    row(o.level, String(o.count));
+  }
+  y += 8;
+
+  heading("3. Compliance Controls");
+  row("Compliance Rate", `${data.compliance.rate}%`);
+  row("Governance Gaps", String(data.compliance.totalGaps));
+  y += 8;
+
+  heading("4. Risk Classification");
+  row("Critical", String(data.agents.byRisk.critical));
+  row("High", String(data.agents.byRisk.high));
+  row("Medium", String(data.agents.byRisk.medium));
+  row("Low", String(data.agents.byRisk.low));
+  y += 8;
+
+  heading("5. Recommendations");
+  const recs: string[] = [];
+  if (data.aiAct.highRiskSystems > 0) recs.push(`${data.aiAct.highRiskSystems} high-risk systems require conformity assessment (Art. 43).`);
+  if (data.agents.byRisk.high > 3) recs.push(`${data.agents.byRisk.high} agents classified as high risk. Review risk classification.`);
+  if (data.aiAct.agentsWithoutSystem > 0) recs.push(`${data.aiAct.agentsWithoutSystem} agents not linked to an AI System. Link them per AI Act Art. 3.1.`);
+  if (data.compliance.rate < 85) recs.push(`Compliance rate is ${data.compliance.rate}%. Address outstanding governance gaps.`);
+  if (recs.length === 0) recs.push("No critical AI Act compliance issues detected. Continue monitoring.");
+  for (const r of recs) {
+    doc.fontSize(10).font("Helvetica").fillColor("#d1d5db").text(`· ${r}`, left, y);
+    y += 18;
+  }
+
+  y += 20; hr();
+  doc.fontSize(8).font("Helvetica").fillColor("#4b5563").text(`Generated by CodeGuard AI Governance OS · ${new Date().toISOString()}`, left, y);
+  doc.end();
+  return Buffer.concat(chunks);
+}
+
+export function generateDORAReport(data: ReportData): Uint8Array {
+  const doc = new PDFDocument({ margin: 50, size: "A4" });
+  const chunks: Buffer[] = [];
+  doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+
+  let y = 50;
+  const left = 50;
+  const right = 545;
+
+  function hr() { y += 6; doc.moveTo(left, y).lineTo(right, y).stroke("#232948"); y += 12; }
+  function heading(text: string, size: number = 14) { y += 8; doc.fontSize(size).font("Helvetica-Bold").fillColor("#ffffff").text(text, left, y); y += size + 8; }
+  function row(label: string, value: string) { doc.fontSize(10).font("Helvetica").fillColor("#9ca3af").text(label, left, y, { width: 250, continued: true }); doc.fillColor("#ffffff").text(value); y += 18; }
+
+  doc.fontSize(18).font("Helvetica-Bold").fillColor("#1337ec").text("DORA Readiness Report", left, y);
+  y += 26;
+  doc.fontSize(10).font("Helvetica").fillColor("#9ca3af").text(`${data.org.name} · ${data.org.date}`, left, y);
+  y += 6;
+  doc.fillColor("#9ca3af").text(`DORA (EU 2022/2554) — ICT Operational Resilience`, left, y);
+  y += 20;
+  hr();
+
+  heading("1. ICT Incident Summary");
+  row("Open Incidents", String(data.incidents.open));
+  row("DORA-Classified Incidents", String(data.incidents.doraOpen));
+  row("Major Incidents (EBA RTS)", String(data.dora.majorIncidents));
+  row("Reporting Status", data.dora.reportingStatus);
+  y += 8;
+
+  heading("2. AI Agent Governance (DORA Art. 8)");
+  row("Total Agents", String(data.agents.total));
+  row("Compliance Rate", `${data.compliance.rate}%`);
+  row("High-Risk Agents", String(data.agents.byRisk.high + data.agents.byRisk.critical));
+  y += 8;
+
+  heading("3. ICT Third-Party Risk");
+  row("AI Systems", String(data.systems.total));
+  row("High-Risk Systems", String(data.aiAct.highRiskSystems));
+  y += 8;
+
+  heading("4. Recent Incidents");
+  for (const inc of data.incidents.recent) {
+    row(inc.code, `${inc.severity} · ${inc.status}`);
+  }
+  y += 8;
+
+  heading("5. Recommendations");
+  const recs: string[] = [];
+  if (data.incidents.doraOpen > 0) recs.push(`${data.incidents.doraOpen} DORA incidents still open. Review DORA Art. 19 reporting deadlines.`);
+  if (data.dora.majorIncidents > 0) recs.push(`${data.dora.majorIncidents} major incidents require immediate notification per DORA Art. 19(4).`);
+  if (data.compliance.rate < 85) recs.push(`Agent compliance rate at ${data.compliance.rate}%. DORA Art. 8 requires complete ICT asset inventory.`);
+  if (recs.length === 0) recs.push("No critical DORA issues detected. Continue monitoring.");
+  for (const r of recs) {
+    doc.fontSize(10).font("Helvetica").fillColor("#d1d5db").text(`· ${r}`, left, y);
+    y += 18;
+  }
+
+  y += 20; hr();
+  doc.fontSize(8).font("Helvetica").fillColor("#4b5563").text(`Generated by CodeGuard AI Governance OS · ${new Date().toISOString()}`, left, y);
+  doc.end();
+  return Buffer.concat(chunks);
+}

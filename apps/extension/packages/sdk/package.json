@@ -1,0 +1,46 @@
+{
+    "name": "@codeguard/sdk",
+    "version": "1.0.0",
+    "description": "CodeGuard AI Universal SDK - Compliance scanning and auto-fix for any platform",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "scripts": {
+        "build": "tsup src/index.ts --format cjs,esm --dts",
+        "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+        "lint": "tsc --noEmit",
+        "clean": "rm -rf dist"
+    },
+    "keywords": [
+        "codeguard",
+        "compliance",
+        "gdpr",
+        "lgpd",
+        "security",
+        "ai",
+        "llm",
+        "autofix"
+    ],
+    "author": "CodeGuard AI",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/codeguard/sdk"
+    },
+    "peerDependencies": {},
+    "devDependencies": {
+        "tsup": "^8.0.0",
+        "typescript": "^5.3.0"
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ]
+}

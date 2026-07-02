@@ -1,0 +1,26 @@
+startCommand:
+  type: stdio
+  config:
+    command: node
+    args:
+      - "out/src/mcp-server.js"
+build:
+  exclude:
+    - vscode
+  external:
+    - vscode
+configSchema:
+  type: object
+  properties:
+    CODEGUARD_LICENSE_KEY:
+      type: string
+      description: "CodeGuard License Key (Leave empty for Free Tier)"
+    OPENAI_API_KEY:
+      type: string
+      description: "OpenAI API Key (Required for AI Analysis)"
+  required:
+    - OPENAI_API_KEY
+
+
+
+
