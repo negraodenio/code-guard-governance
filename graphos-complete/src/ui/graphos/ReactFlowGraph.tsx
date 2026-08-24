@@ -9,10 +9,13 @@ import {
   Panel,
   useNodesState,
   useEdgesState,
+  useReactFlow,
+  ReactFlowProvider,
   type Node,
   type Edge,
   type NodeTypes,
   MarkerType,
+  BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -44,8 +47,19 @@ const nodeTypes: NodeTypes = {
   owner: GenericNode,
 };
 
+// Node width per type (must match actual rendered widths)
+const NODE_WIDTHS: Record<string, number> = {
+  agent: 310, persona: 310,
+  control: 270, cg_ag_control: 270,
+  data_asset: 270, data: 270,
+  risk: 270, incident: 270,
+  generic: 240, tool: 240, external_system: 240,
+  decision: 240, regulation: 240, certificate: 240,
+  evidence: 240, model: 240, owner: 240,
+};
+
 type FilterCategory = 'all' | 'agents' | 'pii' | 'high_risk' | 'controls';
-type ViewMode = 'progressive' | 'complete';
+type ViewMode = 'overview' | 'expanded';
 
 interface ReactFlowGraphProps {
   data: GraphData;
@@ -55,68 +69,70 @@ interface ReactFlowGraphProps {
   smartQuery?: string;
 }
 
-export default function ReactFlowGraph({
+// ─── Inner component (needs ReactFlowProvider context) ───────────────────────
+function GraphInner({
   data,
   height = '660px',
   onNodeClick,
   smartQuery,
 }: ReactFlowGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { fitView } = useReactFlow();
+
   const [direction, setDirection] = useState<LayoutDirection>('LR');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterCategory>('all');
-  const [viewMode, setViewMode] = useState<ViewMode>('progressive');
+  const [viewMode, setViewMode] = useState<ViewMode>('overview');
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
-    if (smartQuery) {
-      setSearchQuery(smartQuery);
-    }
+    if (smartQuery) setSearchQuery(smartQuery);
   }, [smartQuery]);
 
-  // Find all agent nodes
+  // ── Agent nodes only
   const agentNodes = useMemo(() => {
-    if (!data || !data.nodes) return [];
+    if (!data?.nodes) return [];
     return data.nodes.filter(
-      (n) => (n.type || '').toLowerCase() === 'agent' || (n.type || '').toLowerCase() === 'persona'
+      (n) => ['agent', 'persona'].includes((n.type || '').toLowerCase())
     );
   }, [data]);
 
-  // Focused 1-hop subgraph on selected agent
+  // ── 1-hop subgraph for selected agent (max 12 neighbours to stay readable)
   const focusedNodeIds = useMemo(() => {
-    if (!selectedAgentId || !data || !data.edges) return null;
-
+    if (!selectedAgentId || !data?.edges) return null;
     const ids = new Set<string>([selectedAgentId]);
-    data.edges.forEach((edge) => {
-      if (edge.source === selectedAgentId) ids.add(edge.target);
-      if (edge.target === selectedAgentId) ids.add(edge.source);
+    data.edges.forEach((e) => {
+      if (e.source === selectedAgentId) ids.add(e.target);
+      if (e.target === selectedAgentId) ids.add(e.source);
     });
     return ids;
   }, [selectedAgentId, data]);
 
-  // Filtered raw nodes
+  // ── Visible node list based on mode
   const rawFilteredNodes = useMemo(() => {
-    if (!data || !data.nodes) return [];
-
+    if (!data?.nodes) return [];
     let list = data.nodes;
 
     if (focusedNodeIds) {
-      list = list.filter((n) => focusedNodeIds.has(n.id));
-    } else if (viewMode === 'progressive') {
-      list = agentNodes.length > 0 ? agentNodes : data.nodes.slice(0, 10);
+      // Drill-down: only the agent + its direct connections (cap at 16)
+      list = list.filter((n) => focusedNodeIds.has(n.id)).slice(0, 16);
+    } else if (viewMode === 'overview') {
+      // Overview: agents only (max 12 for readability)
+      list = agentNodes.slice(0, 12);
     }
+    // Expanded: all nodes
 
+    // Apply category filter
     list = list.filter((node) => {
       const type = (node.type || '').toLowerCase();
       const label = node.label.toLowerCase();
-      const subtitle = (node.subtitle || '').toLowerCase();
-
-      if (activeFilter === 'agents') return type === 'agent' || type === 'persona';
-      if (activeFilter === 'pii') return label.includes('pii') || subtitle.includes('pii') || Boolean((node as any).hasPii || (node as any).payload?.hasPII);
+      const sub = (node.subtitle || '').toLowerCase();
+      if (activeFilter === 'agents') return ['agent', 'persona'].includes(type);
+      if (activeFilter === 'pii') return label.includes('pii') || sub.includes('pii') || (node as any).hasPii;
       if (activeFilter === 'high_risk') return (node.score !== undefined && node.score < 70) || label.includes('risk');
-      if (activeFilter === 'controls') return type === 'control' || type === 'cg_ag_control';
+      if (activeFilter === 'controls') return ['control', 'cg_ag_control'].includes(type);
       return true;
     });
 
@@ -125,25 +141,22 @@ export default function ReactFlowGraph({
 
   const activeNodeIdSet = useMemo(() => new Set(rawFilteredNodes.map((n) => n.id)), [rawFilteredNodes]);
 
-  // Initial layout computation to prevent stray edge lines
+  // ── Build positioned nodes + edges
   const { initialNodes, initialEdges } = useMemo(() => {
-    if (rawFilteredNodes.length === 0) {
-      return { initialNodes: [], initialEdges: [] };
-    }
+    if (rawFilteredNodes.length === 0) return { initialNodes: [], initialEdges: [] };
 
-    const unpositionedNodes: Node[] = rawFilteredNodes.map((node, i) => {
+    const rfNodes: Node[] = rawFilteredNodes.map((node, i) => {
       const typeStr = (node.type || 'generic').toLowerCase();
       const mappedType = nodeTypes[typeStr] ? typeStr : 'generic';
-
       const isMatching =
         searchQuery.trim() === '' ||
         node.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (node.subtitle && node.subtitle.toLowerCase().includes(searchQuery.toLowerCase()));
+        (node.subtitle || '').toLowerCase().includes(searchQuery.toLowerCase());
 
       return {
         id: node.id,
         type: mappedType,
-        position: { x: (i % 3) * 350, y: Math.floor(i / 3) * 200 },
+        position: { x: (i % 3) * 400, y: Math.floor(i / 3) * 220 }, // fallback, Dagre overrides
         data: {
           label: node.label,
           subtitle: node.subtitle,
@@ -153,67 +166,52 @@ export default function ReactFlowGraph({
           color: node.color,
           payload: node.payload,
           type: node.type,
-          isSelected: selectedNode?.id === node.id,
+          hasPii: (node as any).hasPii,
         },
-        style: {
-          opacity: isMatching ? 1 : 0.25,
-        },
+        style: { opacity: isMatching ? 1 : 0.2 },
       };
     });
 
-    const filteredEdges: Edge[] = (data?.edges || [])
-      .filter((edge) => activeNodeIdSet.has(edge.source) && activeNodeIdSet.has(edge.target))
+    const rfEdges: Edge[] = (data?.edges || [])
+      .filter((e) => activeNodeIdSet.has(e.source) && activeNodeIdSet.has(e.target))
       .map((edge, idx) => {
         const sentiment = edge.sentiment || 'neutral';
-        const isNegative = sentiment === 'negative' || sentiment === 'critical';
-        const isPositive = sentiment === 'positive' || sentiment === 'compliant';
-
-        const strokeColor = isNegative ? '#f87171' : isPositive ? '#22c55e' : '#0ECFB8';
+        const isNeg = sentiment === 'negative' || sentiment === 'critical' || sentiment === 'disagree';
+        const isPos = sentiment === 'positive' || sentiment === 'compliant' || sentiment === 'agree';
+        const color = isNeg ? '#f87171' : isPos ? '#22c55e' : '#0ECFB8';
 
         return {
           id: `e-${edge.source}-${edge.target}-${idx}`,
           source: edge.source,
           target: edge.target,
           label: edge.label || '',
-          animated: edge.dash || isNegative || isPositive,
-          type: 'smoothstep',
-          style: {
-            stroke: strokeColor,
-            strokeWidth: 2.2,
-            opacity: 0.9,
-          },
-          labelStyle: {
-            fill: '#F0F4FA',
-            fontWeight: 800,
-            fontSize: 10,
-            fontFamily: 'monospace',
-          },
-          labelBgStyle: {
-            fill: '#080A0E',
-            fillOpacity: 0.95,
-          },
-          labelBgPadding: [6, 4] as [number, number],
-          labelBgBorderRadius: 6,
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: strokeColor,
-            width: 14,
-            height: 14,
-          },
+          animated: isNeg || isPos,
+          type: 'bezier',
+          style: { stroke: color, strokeWidth: 2, opacity: 0.75 },
+          labelStyle: { fill: '#F0F4FA', fontWeight: 700, fontSize: 10, fontFamily: 'monospace' },
+          labelBgStyle: { fill: '#080A0E', fillOpacity: 0.9 },
+          labelBgPadding: [5, 3] as [number, number],
+          labelBgBorderRadius: 4,
+          markerEnd: { type: MarkerType.ArrowClosed, color, width: 12, height: 12 },
         };
       });
 
-    // Run Dagre layout immediately
-    const layouted = getLayoutedElements(unpositionedNodes, filteredEdges, {
+    // Dagre: spacious layout — bigger separation = nodes don't overlap edges
+    const nodeW = focusedNodeIds ? 320 : 330;
+    const nodeH = focusedNodeIds ? 200 : 180;
+    const rankSep = focusedNodeIds ? 220 : 200;
+    const nodeSep = focusedNodeIds ? 60 : 50;
+
+    const layouted = getLayoutedElements(rfNodes, rfEdges, {
       direction,
-      nodeWidth: 320,
-      nodeHeight: 160,
-      rankSep: 140,
-      nodeSep: 90,
+      nodeWidth: nodeW,
+      nodeHeight: nodeH,
+      rankSep,
+      nodeSep,
     });
 
     return { initialNodes: layouted.nodes, initialEdges: layouted.edges };
-  }, [rawFilteredNodes, data?.edges, activeNodeIdSet, searchQuery, selectedNode, direction]);
+  }, [rawFilteredNodes, data?.edges, activeNodeIdSet, searchQuery, direction, focusedNodeIds]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
@@ -221,31 +219,38 @@ export default function ReactFlowGraph({
   useEffect(() => {
     setNodes(initialNodes);
     setEdges(initialEdges);
-  }, [initialNodes, initialEdges, setNodes, setEdges]);
+    // Refit with appropriate zoom after layout
+    const timer = setTimeout(() => {
+      fitView({
+        padding: 0.15,
+        minZoom: focusedNodeIds ? 0.55 : 0.4,
+        maxZoom: focusedNodeIds ? 0.85 : 0.75,
+        duration: 400,
+      });
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [initialNodes, initialEdges, setNodes, setEdges, fitView, focusedNodeIds]);
 
   const handleNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      const originalNode = data.nodes.find((n) => n.id === node.id);
-      if (originalNode) {
-        setSelectedNode(originalNode);
-        const type = (originalNode.type || '').toLowerCase();
-        if (type === 'agent' || type === 'persona') {
-          setSelectedAgentId(originalNode.id);
-        }
+      const orig = data.nodes.find((n) => n.id === node.id);
+      if (orig) {
+        setSelectedNode(orig);
+        const t = (orig.type || '').toLowerCase();
+        if (t === 'agent' || t === 'persona') setSelectedAgentId(orig.id);
       }
-      if (onNodeClick) {
-        onNodeClick(node.id);
-      }
+      onNodeClick?.(node.id);
     },
     [data.nodes, onNodeClick]
   );
 
   const resetDrillDown = useCallback(() => {
     setSelectedAgentId(null);
+    setSelectedNode(null);
   }, []);
 
   const toggleDirection = useCallback(() => {
-    setDirection((prev) => (prev === 'LR' ? 'TB' : 'LR'));
+    setDirection((d) => (d === 'LR' ? 'TB' : 'LR'));
   }, []);
 
   const toggleFullscreen = useCallback(() => {
@@ -259,69 +264,89 @@ export default function ReactFlowGraph({
     }
   }, []);
 
-  const activeAgent = useMemo(() => {
-    if (selectedNode) return selectedNode;
-    if (agentNodes.length > 0) return agentNodes[0];
-    return null;
-  }, [selectedNode, agentNodes]);
+  const activeAgent = selectedNode || agentNodes[0] || null;
+
+  // ── Edge legend data
+  const edgeLegend = [
+    { color: '#22c55e', label: 'Agree / Compliant' },
+    { color: '#f87171', label: 'Risk / Disagree' },
+    { color: '#0ECFB8', label: 'Neutral / Governed' },
+  ];
 
   return (
     <div
       ref={containerRef}
-      className={`relative w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-300 flex flex-col ${
-        isFullscreen ? 'fixed inset-0 z-50 rounded-none h-screen w-screen' : ''
-      }`}
       style={{
-        height: isFullscreen ? '100vh' : typeof height === 'number' ? `${height}px` : height,
-        background: 'radial-gradient(circle at 50% 25%, #101726 0%, #080A0E 100%)',
+        position: isFullscreen ? 'fixed' : 'relative',
+        inset: isFullscreen ? 0 : undefined,
+        zIndex: isFullscreen ? 9999 : undefined,
+        width: '100%',
+        height: isFullscreen ? '100vh' : (typeof height === 'number' ? `${height}px` : height),
+        background: 'radial-gradient(ellipse at 50% 0%, #0d1520 0%, #080A0E 70%)',
+        borderRadius: isFullscreen ? 0 : 20,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
       }}
     >
-      {/* Top Header Dock */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-[#0F1219]/95 backdrop-blur-xl z-20 flex-wrap gap-2">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-xl bg-gradient-to-r from-teal-500/20 to-indigo-500/20 border border-teal-500/40 text-[#0ECFB8] text-xs font-bold font-mono">
-            <span>🧠</span>
-            <span>GRAPHOS COCKPIT</span>
+      {/* ── Top Header Bar ──────────────────────────────────────────── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+        background: 'rgba(10,13,20,0.95)', backdropFilter: 'blur(20px)',
+        flexWrap: 'wrap', gap: 8, flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* Brand pill */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '4px 12px', borderRadius: 10,
+            background: 'linear-gradient(135deg, rgba(14,207,184,0.18), rgba(91,80,240,0.18))',
+            border: '1px solid rgba(14,207,184,0.35)',
+          }}>
+            <span style={{ fontSize: 13 }}>🧠</span>
+            <span style={{ fontSize: 11, fontWeight: 900, letterSpacing: '0.1em', color: '#0ECFB8', fontFamily: 'monospace' }}>GRAPHOS COCKPIT</span>
           </div>
 
           {selectedAgentId ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">Linhagem do Agente:</span>
-              <span className="text-xs font-bold text-white bg-white/10 px-2.5 py-0.5 rounded-full border border-white/15">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 11, color: '#6B7A95' }}>Linhagem:</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#F0F4FA', background: 'rgba(255,255,255,0.08)', padding: '2px 10px', borderRadius: 999, border: '1px solid rgba(255,255,255,0.12)' }}>
                 {selectedNode?.label || selectedAgentId}
               </span>
-              <button
-                onClick={resetDrillDown}
-                className="text-xs font-bold text-[#0ECFB8] hover:underline cursor-pointer ml-1"
-              >
-                ← Ver Todos os Agentes
+              <button onClick={resetDrillDown} style={{ fontSize: 11, fontWeight: 700, color: '#0ECFB8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                ← Ver Todos
               </button>
             </div>
           ) : (
-            <span className="text-xs text-slate-400 font-medium hidden sm:inline">
-              {viewMode === 'progressive'
-                ? `Exibindo ${nodes.length} Agentes em Destaque (Clique em um nó para expandir a linhagem)`
-                : `Visualização de Rede Completa (${nodes.length} nós)`}
+            <span style={{ fontSize: 11, color: '#4B5776' }}>
+              {viewMode === 'overview'
+                ? `${nodes.length} Agentes em destaque  ·  Clique num agente para expandir a linhagem`
+                : `Rede completa  ·  ${nodes.length} nós · ${edges.length} conexões`}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          {/* View mode toggle */}
           <button
-            onClick={() => setViewMode((prev) => (prev === 'progressive' ? 'complete' : 'progressive'))}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-              viewMode === 'progressive'
-                ? 'bg-cyan-950/80 border-cyan-500/60 text-[#0ECFB8] shadow-sm'
-                : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
-            }`}
+            onClick={() => { setViewMode((v) => v === 'overview' ? 'expanded' : 'overview'); if (selectedAgentId) resetDrillDown(); }}
+            style={{
+              padding: '5px 12px', borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: '1px solid',
+              borderColor: viewMode === 'overview' ? 'rgba(14,207,184,0.5)' : 'rgba(255,255,255,0.12)',
+              background: viewMode === 'overview' ? 'rgba(14,207,184,0.12)' : 'rgba(255,255,255,0.05)',
+              color: viewMode === 'overview' ? '#0ECFB8' : '#9AA5BB',
+            }}
           >
-            {viewMode === 'progressive' ? '👁️ Foco Progressivo' : '🌐 Rede Completa'}
+            {viewMode === 'overview' ? '👁️ Foco Executivo' : '🌐 Rede Completa'}
           </button>
         </div>
       </div>
 
-      {/* React Flow Container */}
-      <div style={{ width: '100%', height: '580px', position: 'relative' }}>
+      {/* ── React Flow Canvas ─────────────────────────────────────────── */}
+      <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -329,57 +354,58 @@ export default function ReactFlowGraph({
           onEdgesChange={onEdgesChange}
           onNodeClick={handleNodeClick}
           nodeTypes={nodeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.25 }}
-          minZoom={0.2}
-          maxZoom={2}
+          minZoom={0.15}
+          maxZoom={1.5}
           attributionPosition="bottom-left"
-          className="react-flow-dark"
+          nodesDraggable={true}
+          elementsSelectable={true}
+          proOptions={{ hideAttribution: true }}
         >
-          <Background color="#1e293b" gap={30} size={1.2} />
+          <Background
+            variant={BackgroundVariant.Dots}
+            color="rgba(255,255,255,0.06)"
+            gap={28}
+            size={1}
+          />
 
-          {/* Floating Search & Filters Dock */}
-          <Panel position="top-left" className="flex items-center gap-2 m-4 flex-wrap">
-            <div className="relative flex items-center">
-              <span className="absolute left-3 text-xs text-slate-400">🔍</span>
+          {/* ── Floating Search + Filters ───────────────────────────── */}
+          <Panel position="top-left" style={{ margin: '12px 0 0 12px', display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <span style={{ position: 'absolute', left: 10, fontSize: 12, color: '#4B5776', pointerEvents: 'none' }}>🔍</span>
               <input
                 type="text"
-                placeholder="Buscar nó no grafo..."
+                placeholder="Buscar nó..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-9 w-48 sm:w-60 rounded-xl bg-[#0F1219]/95 border border-white/15 pl-8 pr-3 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-[#0ECFB8] backdrop-blur-xl shadow-2xl transition-all"
+                style={{
+                  height: 34, width: 180, paddingLeft: 30, paddingRight: 28,
+                  borderRadius: 10, background: 'rgba(10,13,20,0.95)', border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#F0F4FA', fontSize: 11, outline: 'none', fontFamily: 'inherit',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+                }}
               />
               {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 text-xs text-slate-400 hover:text-white"
-                >
-                  ✕
-                </button>
+                <button onClick={() => setSearchQuery('')} style={{ position: 'absolute', right: 8, background: 'none', border: 'none', color: '#6B7A95', cursor: 'pointer', fontSize: 13, padding: 0, lineHeight: 1 }}>✕</button>
               )}
             </div>
 
-            <div className="flex items-center gap-1 rounded-xl bg-[#0F1219]/95 border border-white/15 p-1 backdrop-blur-xl shadow-2xl">
-              {(
-                [
-                  { id: 'all', label: 'Todos' },
-                  { id: 'agents', label: '🤖 Agentes' },
-                  { id: 'pii', label: '⚠️ PII' },
-                  { id: 'high_risk', label: '🔴 Alto Risco' },
-                  { id: 'controls', label: '🛡️ CG-AG' },
-                ] as const
-              ).map((f) => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: 'rgba(10,13,20,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '2px 3px', boxShadow: '0 4px 16px rgba(0,0,0,0.4)' }}>
+              {([
+                { id: 'all', label: 'Todos' },
+                { id: 'agents', label: '🤖 Agentes' },
+                { id: 'pii', label: '⚠️ PII' },
+                { id: 'high_risk', label: '🔴 Risco' },
+                { id: 'controls', label: '🛡️ CG-AG' },
+              ] as const).map((f) => (
                 <button
                   key={f.id}
-                  onClick={() => {
-                    setActiveFilter(f.id);
-                    if (selectedAgentId) resetDrillDown();
+                  onClick={() => { setActiveFilter(f.id); if (selectedAgentId) resetDrillDown(); }}
+                  style={{
+                    padding: '4px 10px', borderRadius: 8, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none',
+                    background: activeFilter === f.id ? '#0ECFB8' : 'transparent',
+                    color: activeFilter === f.id ? '#080A0E' : '#9AA5BB',
+                    transition: 'all 0.15s',
                   }}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all duration-150 ${
-                    activeFilter === f.id
-                      ? 'bg-[#0ECFB8] text-[#080A0E] shadow-sm'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
                 >
                   {f.label}
                 </button>
@@ -387,113 +413,169 @@ export default function ReactFlowGraph({
             </div>
           </Panel>
 
-          {/* Top Right Layout & Fullscreen Dock */}
-          <Panel position="top-right" className="flex items-center gap-2 m-4">
+          {/* ── Top Right: Direction + Fullscreen ───────────────────── */}
+          <Panel position="top-right" style={{ margin: '12px 12px 0 0', display: 'flex', gap: 6 }}>
             <button
               onClick={toggleDirection}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0F1219]/95 border border-white/15 text-xs font-bold text-slate-200 hover:bg-[#151A24] hover:border-[#0ECFB8]/60 shadow-2xl backdrop-blur-xl transition-all"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '5px 12px', borderRadius: 10,
+                background: 'rgba(10,13,20,0.95)', border: '1px solid rgba(255,255,255,0.1)',
+                color: '#9AA5BB', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+              }}
             >
               <span>🧭</span>
-              <span className="font-mono text-[#0ECFB8]">
-                {direction === 'LR' ? 'Horizontal (L→R)' : 'Vertical (T→B)'}
+              <span style={{ fontFamily: 'monospace', color: '#0ECFB8' }}>
+                {direction === 'LR' ? 'Horizontal' : 'Vertical'}
               </span>
             </button>
-
             <button
               onClick={toggleFullscreen}
-              className="flex items-center justify-center h-9 w-9 rounded-xl bg-[#0F1219]/95 border border-white/15 text-slate-300 hover:text-white hover:border-cyan-500/60 shadow-2xl backdrop-blur-xl transition-all"
               title={isFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia'}
+              style={{
+                width: 34, height: 34, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(10,13,20,0.95)', border: '1px solid rgba(255,255,255,0.1)',
+                color: '#9AA5BB', cursor: 'pointer', fontSize: 14,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+              }}
             >
-              {isFullscreen ? '↙️' : '⛶'}
+              {isFullscreen ? '⊠' : '⛶'}
             </button>
           </Panel>
 
-          <Controls
-            className="!bg-[#0F1219]/95 !border-white/15 !shadow-2xl !rounded-2xl !p-1.5 !backdrop-blur-xl [&>button]:!bg-[#151A24] [&>button]:!border-white/10 [&>button]:!text-slate-200 hover:[&>button]:!bg-[#0ECFB8] hover:[&>button]:!text-black transition-colors"
-            showInteractive={false}
-          />
+          {/* ── Controls ─────────────────────────────────────────────── */}
+          <Controls showInteractive={false} />
 
+          {/* ── Minimap ──────────────────────────────────────────────── */}
           <MiniMap
             nodeStrokeWidth={3}
-            nodeColor={(node) => {
-              if (node.type === 'agent') return '#0ECFB8';
-              if (node.type === 'control') return '#22c55e';
-              if (node.type === 'data_asset') return '#a855f7';
-              if (node.type === 'risk' || node.type === 'incident') return '#ef4444';
+            nodeColor={(n) => {
+              if (n.type === 'agent' || n.type === 'persona') return '#0ECFB8';
+              if (n.type === 'control' || n.type === 'cg_ag_control') return '#22c55e';
+              if (n.type === 'data_asset' || n.type === 'data') return '#a855f7';
+              if (n.type === 'risk' || n.type === 'incident') return '#ef4444';
               return '#38bdf8';
             }}
-            maskColor="rgba(8, 10, 14, 0.88)"
-            className="!bg-[#0F1219]/95 !border-white/15 !rounded-2xl !shadow-2xl"
+            maskColor="rgba(8,10,14,0.85)"
             zoomable
             pannable
           />
+
+          {/* ── Edge Legend ───────────────────────────────────────────── */}
+          <Panel position="bottom-left" style={{ margin: '0 0 8px 8px' }}>
+            <div style={{
+              display: 'flex', gap: 14, padding: '5px 12px',
+              background: 'rgba(10,13,20,0.9)', borderRadius: 8,
+              border: '1px solid rgba(255,255,255,0.07)',
+              fontSize: 10, color: '#6B7A95',
+            }}>
+              {edgeLegend.map((l) => (
+                <span key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ width: 18, height: 2, borderRadius: 999, background: l.color, display: 'inline-block' }} />
+                  {l.label}
+                </span>
+              ))}
+            </div>
+          </Panel>
         </ReactFlow>
 
-        {/* 🌟 Floating Bottom Intelligence Bar */}
+        {/* ── Bottom Intelligence Cockpit Bar ───────────────────────── */}
         {activeAgent && (
-          <div className="absolute bottom-4 left-4 right-4 z-30 rounded-2xl border border-white/15 bg-[#080A0E]/95 backdrop-blur-2xl px-5 py-3 shadow-2xl flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#0ECFB8]/20 to-[#5B50F0]/20 border border-cyan-500/30 text-xl">
+          <div style={{
+            position: 'absolute', bottom: 48, left: 12, right: 12, zIndex: 30,
+            borderRadius: 14, border: '1px solid rgba(255,255,255,0.1)',
+            background: 'rgba(8,10,14,0.96)', backdropFilter: 'blur(24px)',
+            padding: '10px 16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
+            boxShadow: '0 -4px 32px rgba(0,0,0,0.5)',
+          }}>
+            {/* Left: agent identity */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+                background: 'linear-gradient(135deg, rgba(14,207,184,0.2), rgba(91,80,240,0.2))',
+                border: '1px solid rgba(14,207,184,0.3)',
+              }}>
                 {activeAgent.emoji || '🤖'}
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-black tracking-widest text-[#0ECFB8] uppercase px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                  <span style={{ fontSize: 8, fontWeight: 900, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '1px 6px', borderRadius: 999, background: 'rgba(14,207,184,0.15)', color: '#0ECFB8', border: '1px solid rgba(14,207,184,0.3)' }}>
                     SELECIONADO
                   </span>
-                  <span className="text-xs font-bold text-white">{activeAgent.label}</span>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: '#F0F4FA' }}>{activeAgent.label}</span>
                 </div>
-                <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-                  {activeAgent.subtitle || 'Agente de IA em operação no ecossistema governado'}
+                <p style={{ fontSize: 10, color: '#4B5776', margin: 0, fontFamily: 'monospace' }}>
+                  {activeAgent.subtitle || 'Agente de IA no ecossistema governado CG-AG'}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-5 text-xs font-mono">
-              <div>
-                <span className="text-slate-500 block text-[9px] uppercase font-sans">Risco</span>
-                <span className="font-bold text-amber-400">
-                  {activeAgent.score !== undefined && activeAgent.score < 70 ? '🔴 HIGH' : '🟡 MEDIUM'}
-                </span>
-              </div>
+            {/* Right: metrics */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontFamily: 'monospace', fontSize: 11 }}>
+              {[
+                {
+                  label: 'RISCO',
+                  value: activeAgent.score !== undefined && activeAgent.score < 50
+                    ? '🔴 CRITICAL' : activeAgent.score !== undefined && activeAgent.score < 70
+                      ? '🟠 HIGH' : activeAgent.score !== undefined && activeAgent.score < 85
+                        ? '🟡 MEDIUM' : '🟢 LOW',
+                  color: activeAgent.score !== undefined && activeAgent.score < 50
+                    ? '#f87171' : activeAgent.score !== undefined && activeAgent.score < 70
+                      ? '#fb923c' : activeAgent.score !== undefined && activeAgent.score < 85
+                        ? '#facc15' : '#22c55e',
+                },
+                {
+                  label: 'PII ACCESS',
+                  value: (activeAgent as any).hasPii || activeAgent.label.toLowerCase().includes('customer') || activeAgent.label.toLowerCase().includes('triage') ? '⚠️ SIM (LGPD)' : '✓ NÃO',
+                  color: (activeAgent as any).hasPii ? '#f87171' : '#22c55e',
+                },
+                {
+                  label: 'CG-AG SCORE',
+                  value: `${activeAgent.score ?? 85}%  (${Math.round(((activeAgent.score ?? 85) / 100) * 12)}/12)`,
+                  color: '#0ECFB8',
+                },
+              ].map((m, i) => (
+                <React.Fragment key={m.label}>
+                  {i > 0 && <div style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.08)' }} />}
+                  <div>
+                    <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.1em', color: '#4B5776', marginBottom: 2, fontFamily: 'sans-serif', textTransform: 'uppercase' }}>{m.label}</div>
+                    <div style={{ fontWeight: 700, color: m.color }}>{m.value}</div>
+                  </div>
+                </React.Fragment>
+              ))}
 
-              <div className="h-6 w-[1px] bg-white/10" />
-
-              <div>
-                <span className="text-slate-500 block text-[9px] uppercase font-sans">Acesso PII</span>
-                <span className="font-bold text-rose-400">
-                  {Boolean((activeAgent as any).hasPii || (activeAgent as any).payload?.hasPII) || activeAgent.label.toLowerCase().includes('customer') || activeAgent.label.toLowerCase().includes('triage') ? 'SIM (LGPD)' : 'NÃO'}
-                </span>
-              </div>
-
-              <div className="h-6 w-[1px] bg-white/10" />
-
-              <div>
-                <span className="text-slate-500 block text-[9px] uppercase font-sans">Score CG-AG</span>
-                <span className="font-bold text-[#0ECFB8]">
-                  {activeAgent.score !== undefined ? `${activeAgent.score}%` : '85%'} (10/12)
-                </span>
-              </div>
-
-              <div className="h-6 w-[1px] bg-white/10" />
+              <div style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.08)' }} />
 
               <button
                 onClick={() => {
-                  if (selectedAgentId === activeAgent.id) {
-                    resetDrillDown();
-                  } else {
-                    setSelectedAgentId(activeAgent.id);
-                    setSelectedNode(activeAgent);
-                  }
+                  if (selectedAgentId === activeAgent.id) resetDrillDown();
+                  else { setSelectedAgentId(activeAgent.id); setSelectedNode(activeAgent); }
                 }}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#0ECFB8] to-[#5B50F0] text-slate-950 font-bold text-xs shadow-lg shadow-cyan-950/60 hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+                style={{
+                  padding: '7px 16px', borderRadius: 10, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none',
+                  background: 'linear-gradient(135deg, #0ECFB8, #5B50F0)',
+                  color: '#080A0E', boxShadow: '0 4px 16px rgba(14,207,184,0.3)',
+                  transition: 'opacity 0.2s',
+                }}
               >
-                {selectedAgentId === activeAgent.id ? '← Ver Todos os Agentes' : '🔍 Expandir Linhagem'}
+                {selectedAgentId === activeAgent.id ? '← Ver Todos' : '🔍 Expandir Linhagem'}
               </button>
             </div>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+// ─── Exported wrapper with ReactFlowProvider ─────────────────────────────────
+export default function ReactFlowGraph(props: ReactFlowGraphProps) {
+  return (
+    <ReactFlowProvider>
+      <GraphInner {...props} />
+    </ReactFlowProvider>
   );
 }

@@ -57,7 +57,7 @@ const CouncilIAInputSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     // 1. Authentication
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -69,6 +69,7 @@ export async function POST(req: NextRequest) {
         },
       }
     );
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     // CouncilIA v12.0.0 Scientific Authority // v12.0.0 Elite
     

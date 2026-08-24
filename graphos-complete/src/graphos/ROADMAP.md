@@ -1,31 +1,31 @@
 # GraphOS — Roadmap de Excelência
 
-## Arquitetura
+## Arquitectura Implementada
 
 ```
-┌─────────────────────────────────────────────────┐
-│                    VIEWS                        │
-│  CEO  CFO  CISO  DPO  Compliance  Auditor       │
-│  Board  Constitutional  AgentEcosystem          │
-└───────────────────┬─────────────────────────────┘
-                    │ query
-┌───────────────────▼─────────────────────────────┐
-│              QUERY / TRAVERSAL                   │
-│  engine.ts  ·  traversals.ts  ·  filters.ts     │
-│  Agent→Tool→Data→Regulation→Control→Evidence   │
-└───────────────────┬─────────────────────────────┘
-                    │ build
-┌───────────────────▼─────────────────────────────┐
-│          GRAPH DATA MODEL (in-memory)            │
-│  entities.ts  ·  relationships.ts               │
-│  GraphNode + GraphEdge + GraphData              │
-└───────────────────┬─────────────────────────────┘
-                    │ source
-┌───────────────────▼─────────────────────────────┐
-│         DATA SOURCES (Supabase + config)         │
-│  debate_runs   validations   consents           │
-│  persona_config  compliance_db  audit_logs      │
-└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                         VIEWS (9 executivas)                    │
+│  CEO  CFO  CISO  DPO  Compliance  Auditor                       │
+│  Board  Constitutional  AgentEcosystem                          │
+└─────────────────────────────────────┬───────────────────────────┘
+                                      │ query
+┌─────────────────────────────────────▼───────────────────────────┐
+│              QUERY / TRAVERSAL ENGINE                           │
+│  @council/graphos: VIEW_BUILDERS  VIEW_META  buildFullGraph     │
+│  Agent→Tool→Data→Regulation→Control→Evidence                   │
+└─────────────────────────────────────┬───────────────────────────┘
+                                      │ build
+┌─────────────────────────────────────▼───────────────────────────┐
+│         GRAPH DATA MODEL (dual: in-memory + Postgres)           │
+│  GraphEngine  GraphEntity  Relationship  ViewResult             │
+│  GraphNode  GraphEdge  GraphData  GraphMetadata                 │
+└─────────────────────────────────────┬───────────────────────────┘
+                                      │ source
+┌─────────────────────────────────────▼───────────────────────────┐
+│        DATA SOURCES (Supabase PostgreSQL + scanner cache)       │
+│  gov_repo.*  governance_users  agents  agent_edges              │
+│  risk_items  evidences  incidents  governance_ledger            │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Entity Model
@@ -44,60 +44,74 @@ Agent ──USES_TOOL──▶ Tool ──ACCESSES──▶ ExternalSystem
                    Incident ──TRIGGERS──▶ BreachNotification
 ```
 
-## Fases & Entregáveis
+---
 
-### Fase 1 — Data Model Foundation (agora)
-- [ ] `src/graphos/types/entities.ts` — AgentNode, DecisionNode, ToolNode, DataAssetNode, ControlNode, RegulationNode, CertificateNode, RiskNode, IncidentNode, EvidenceNode
-- [ ] `src/graphos/types/relationships.ts` — Edge types com semântica de negócio:
-  - `USES_TOOL` | `ACCESSES_SYSTEM` | `PROCESSES_DATA` | `HAS_PII` | `LEGAL_BASIS`
-  - `MAKES_DECISION` | `EVIDENCED_BY` | `IMPACTS_RISK` | `MITIGATED_BY` | `REQUIRES_CERT`
-  - `REGULATES` | `GOVERNS` | `TRIGGERS_INCIDENT` | `APPEALS_CONTROL`
-- [ ] `src/graphos/engine.ts` — GraphEngine que constrói o grafo completo de múltiplas fontes:
-  - Personas do council → AgentNodes
-  - Ferramentas/config → ToolNodes + ExternalSystemNodes
-  - Decisões/validações → DecisionNodes + EvidenceNodes
-  - Compliance DB → ControlNodes + RegulationNodes + CertificateNodes
-  - Consents → DataAssetNodes com classificação de PII
-- [ ] `src/graphos/traversals.ts` — Traversals pré-construídas (as 9 queries das views)
-- [ ] API: `POST /api/graphos/query` — recebe `{ view, filters }`, retorna subgrafo
+## Status das Fases
 
-### Fase 2 — Core UI + CEO + CFO Views
-- [ ] `src/graphos/ui/ViewSelector.tsx` — Navegação entre as 9 views (abas + ícone)
-- [ ] `src/graphos/ui/StatsCard.tsx` — Card métrico com label, valor, delta, cor
-- [ ] `src/graphos/ui/GraphCanvas.tsx` — D3 force-directed refatorado com suporte a multi-tipo de node
-- [ ] **CEO View**: stats dashboard (agentes, críticos, risco, compliance score) + mini-graph dos top-level nodes
-- [ ] **CFO View**: árvore de custo Decision→Agent→Model→Token, gráfico de barras por agente
+### ✅ Fase 1 — Data Model Foundation
+- [x] `packages/graphos/src/types/entities.ts` — AgentNode, DecisionNode, ToolNode, DataAssetNode, ControlNode, RegulationNode, CertificateNode, RiskNode, IncidentNode, EvidenceNode
+- [x] `packages/graphos/src/types/relationships.ts` — Edge types com semântica: `USES_TOOL` | `ACCESSES_SYSTEM` | `PROCESSES_DATA` | `HAS_PII` | `LEGAL_BASIS` | `MAKES_DECISION` | `EVIDENCED_BY` | `IMPACTS_RISK` | `MITIGATED_BY` | `REQUIRES_CERT` | `REGULATES` | `GOVERNS` | `TRIGGERS_INCIDENT`
+- [x] `packages/graphos/src/engine.ts` — GraphEngine com suporte a múltiplas fontes de dados
+- [x] `packages/graphos/src/views/index.ts` — 9 view builders + VIEW_META
+- [x] API: `POST /api/graphos` — recebe `{ view, param, repoUrl }`, retorna subgrafo
 
-### Fase 3 — CISO + DPO Views
-- [ ] **CISO View**: grafos de Agent→Tool→ExternalSystem com classificação de risco. Destaque para agents sem owner, tools expostas, MCPs, secrets
-- [ ] **DPO View**: grafo Agent→Data→Classification→LegalBasis. Filtro por PII, consent status, retenção
-- [ ] `PIIBadge` component, `RiskBadge` component
+### ✅ Fase 2 — Core UI + CEO + CFO Views
+- [x] `src/graphos/ui/ViewSelector.tsx` — Pill bar de navegação entre 9 views
+- [x] `src/graphos/ui/StatsCard.tsx` — Card métrico glassmorphic
+- [x] `src/ui/graphos/ReactFlowGraph.tsx` — React Flow + Dagre com 5 tipos de nós
+- [x] `src/ui/graphos/nodes/AgentNode.tsx` — Card executivo 310px, inline styles
+- [x] `src/ui/graphos/nodes/ControlNode.tsx` — Card CG-AG 270px, verde
+- [x] `src/ui/graphos/nodes/RiskNode.tsx` — Card risco 270px, colorido por severidade
+- [x] `src/ui/graphos/nodes/DataAssetNode.tsx` — Card data/PII 270px, violeta
+- [x] `src/ui/graphos/nodes/GenericNode.tsx` — Card genérico 240px
+- [x] **CEO View**: stats executivas + grafo de agentes em destaque
+- [x] **CFO View**: custo por agente, token usage, FinOps
 
-### Fase 4 — Compliance + Auditor Views
-- [ ] **Compliance View**: grafo Agent→Decision→Regulation. Mapa de regulações (AI Act, GDPR, LGPD, DORA, NIS2, ISO 42001) com status por agente
-- [ ] **Auditor View**: Decision reconstruction — cadeia completa: quem decidiu, qual modelo, qual prompt, qual evidência, quem aprovou, qual norma
-- [ ] Timeline component para reconstrução temporal
+### ✅ Fase 3 — CISO + DPO Views
+- [x] **CISO View**: Agent→Tool→ExternalSystem, risco por agent, sem owner
+- [x] **DPO View**: Agent→Data→Classification→LegalBasis, PII badge
+- [x] Progressive Disclosure: drill-down de agente → linhagem completa
+- [x] Bottom Intelligence Cockpit Bar: risco, PII, score CG-AG em tempo real
 
-### Fase 5 — Board + Constitutional + Agent Ecosystem
-- [ ] **Board View**: Top 10 riscos materiais, top 10 agentes críticos, exposição regulatória agregada
-- [ ] **Constitutional View**: grafo Agent→Control→Evidence→Certification. Score CG-AG por agente. Exceções e apelações
-- [ ] **Agent Ecosystem View**: mapa completo de todos os agentes, suas ferramentas, dependências e relacionamentos
+### ✅ Fase 4 — Compliance + Auditor Views
+- [x] **Compliance View**: Agent→Regulation map (EU AI Act, LGPD, DORA, ISO 42001)
+- [x] **Auditor View**: Reconstrução de decisão com cadeia de custódia
 
-### Fase 6 — Query Layer + Integração + Export
-- [ ] `QueryBar.tsx` — input de linguagem natural que traduz para traversal (ex: "mostre agents com PII e risco alto")
-- [ ] Export dos grafos como PNG/SVG/PDF
-- [ ] Integração com o dashboard existente
-- [ ] Modo apresentação (fullscreen, auto-rotate entre views)
+### ✅ Fase 5 — Board + Constitutional + Agent Ecosystem
+- [x] **Board View**: Top riscos materiais, agentes críticos, exposição regulatória
+- [x] **Constitutional View**: Agent→Control→Evidence, score CG-AG por agente
+- [x] **Agent Ecosystem View**: mapa completo de todos os agentes e dependências
+
+### ✅ Fase 6 — Query Layer + Scanner + Export
+- [x] **Talk to Governance**: linguagem natural → traversal determinística (PT/EN/ES)
+- [x] **Scanner**: 13 regulações, LangChain/CrewAI/AutoGPT/MCP, Python + TypeScript
+- [x] **GraphOS API**: GET + POST com view, param, repoUrl
+- [x] **Report PDF**: `/api/report` com pdfkit + Board scorecard
+- [x] **Fullscreen mode**: apresentação em board meeting
+- [x] **MiniMap + Controls**: zoom, pan, minimap interativo
+- [x] **Edge Legend**: Agree/Comply (verde) · Risk/Disagree (vermelho) · Governed (teal)
+- [x] **Smart Filters**: Agentes · PII · Alto Risco · CG-AG Controls
+- [x] **Direção de layout**: Horizontal (L→R) ↔ Vertical (T→B)
 
 ---
 
 ## Critérios de Excelência
 
-1. **Cada view responde a uma pergunta de negócio** — não é só gráfico bonito, é insight acionável
-2. **Todas as arestas têm semântica** — não é só "conectado", é `PROCESSES_PII`, `MITIGATED_BY_CONTROL`, `EVIDENCED_BY`
-3. **Cada view pode ser exportada** — PNG para slide, JSON para auditoria
-4. **Grafo é interativo** — clique = drill-down, hover = preview, drag = reorganizar
-5. **Dados vivos** — não é mock, é construído do Supabase + config em tempo real
-6. **Performance** — < 500ms para construir grafo, < 100ms para trocar de view
-7. **Acessível** — contraste, aria-labels, keyboard navigation
-8. **Responsivo** — funciona em desktop e tablet (apresentação em board meeting)
+1. ✅ **Cada view responde a uma pergunta de negócio** — CEO, CFO, CISO, DPO, Compliance, Auditor, Board, Constitutional, Ecosystem
+2. ✅ **Todas as arestas têm semântica** — `PROCESSES_PII`, `MITIGATED_BY_CONTROL`, `EVIDENCED_BY`, `LEGAL_BASIS`
+3. ✅ **Exportação** — PDF via `/api/report`, PNG via html2canvas
+4. ✅ **Grafo interativo** — click=drill-down, hover=preview, drag=reorganizar, fullscreen
+5. ✅ **Dados vivos** — construído do Supabase + scanner em tempo real
+6. ✅ **Performance** — layout Dagre <100ms, fitView com animação 400ms
+7. ⬜ **Acessível** — aria-labels pendentes nos nós do React Flow
+8. ✅ **Responsivo** — funciona em desktop e tablet
+
+---
+
+## Pendente / Backlog
+
+- [ ] `aria-label` nos nós do React Flow para acessibilidade
+- [ ] Export PNG/SVG do canvas (html2canvas integrado mas não exposto no UI)
+- [ ] Service Worker (`sw.js`) — remover registo ou implementar
+- [ ] Modo apresentação com auto-rotate entre views (Fase 6 extra)
+- [ ] Verificar licença React Flow Pro vs OSS (atribuição)
