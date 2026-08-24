@@ -5,10 +5,10 @@ import type { CouncilIAOutput } from '@/types/councilia-universal';
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { runId: string } },
+  { params }: { params: Promise<{ runId: string }> },
 ) {
   try {
-    const { runId } = params;
+    const { runId } = await params;
     if (!runId) {
       return NextResponse.json({ ok: false, error: 'Missing runId' }, { status: 400 });
     }
