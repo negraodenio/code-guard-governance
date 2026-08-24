@@ -1,0 +1,32 @@
+{
+  "name": "@codeguard/compliance-scanner",
+  "version": "1.0.0",
+  "description": "Standalone Enterprise AI & Compliance Repository Scanner supporting 13 Regulations (EU AI Act, LGPD, GDPR, BCB 4893, ANVISA, NIST, ISO 42001, OWASP, DORA, NIS2, CG-AG)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "scan": "ts-node src/cli.ts",
+    "test": "jest"
+  },
+  "keywords": [
+    "ai-governance",
+    "compliance-scanner",
+    "agent-detection",
+    "eu-ai-act",
+    "lgpd",
+    "gdpr",
+    "shadow-ai",
+    "iso42001"
+  ],
+  "author": "CodeGuard Governance",
+  "license": "Proprietary",
+  "dependencies": {
+    "@octokit/rest": "^20.0.2",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}
