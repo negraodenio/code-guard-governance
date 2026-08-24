@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+@import '@xyflow/react/dist/style.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -117,3 +118,105 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ─── React Flow Dark Mode Overrides ─────────────────────────────────── */
+
+/* Canvas background */
+.react-flow {
+  background: transparent !important;
+}
+
+.react-flow__background {
+  background: transparent;
+}
+
+/* Kill the default white node background */
+.react-flow__node {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 16px;
+}
+
+/* Smooth edges */
+.react-flow__edge-path {
+  stroke-linecap: round;
+}
+
+/* Controls */
+.react-flow__controls {
+  background: rgba(15, 18, 25, 0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 4px;
+}
+
+.react-flow__controls-button {
+  background: #151A24 !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: #9AA5BB !important;
+  border-radius: 8px !important;
+  margin: 2px !important;
+}
+
+.react-flow__controls-button:hover {
+  background: #0ECFB8 !important;
+  color: #080A0E !important;
+}
+
+/* Minimap */
+.react-flow__minimap {
+  background: rgba(15, 18, 25, 0.95) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 14px !important;
+}
+
+/* Attribution */
+.react-flow__attribution {
+  background: transparent !important;
+  color: rgba(255,255,255,0.2) !important;
+  font-size: 10px;
+}
+
+.react-flow__attribution a {
+  color: rgba(14, 207, 184, 0.4) !important;
+}
+
+/* Selection box */
+.react-flow__selection {
+  background: rgba(14, 207, 184, 0.08);
+  border: 1px solid rgba(14, 207, 184, 0.4);
+  border-radius: 6px;
+}
+
+/* Handles */
+.react-flow__handle {
+  width: 12px !important;
+  height: 12px !important;
+  background: #0ECFB8 !important;
+  border: 2px solid #080A0E !important;
+  border-radius: 50% !important;
+}
+
+/* ─── Scrollbar hide utility ──────────────────────────────────────────── */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── GraphOS Node Cards baseline (inline fallback) ──────────────────── */
+.graphos-node-card {
+  background: linear-gradient(150deg, #101622 0%, #080A0E 100%);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 16px;
+  width: 310px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+  color: #F0F4FA;
+  font-family: 'DM Sans', sans-serif;
+  position: relative;
+  transition: all 0.3s;
+}

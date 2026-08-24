@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 interface StatsCardProps {
   label: string;
   value: string | number;
@@ -11,29 +13,33 @@ interface StatsCardProps {
 export default function StatsCard({ label, value, color = '#0ECFB8', icon, delta }: StatsCardProps) {
   return (
     <div
+      className="group relative flex flex-col justify-between p-3.5 rounded-xl border border-white/10 bg-[#0F1219]/90 hover:border-white/20 transition-all duration-200 shadow-lg hover:shadow-cyan-950/20"
       style={{
-        background: '#0F1219',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 12,
-        padding: '16px 20px',
-        minWidth: 140,
-        flex: '1 0 auto',
-        transition: 'border-color 0.2s',
-        cursor: 'default',
+        backdropFilter: 'blur(12px)',
       }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)')}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)')}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        {icon && <span style={{ fontSize: 16 }}>{icon}</span>}
-        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6B7A95' }}>
+      <div className="flex items-center justify-between gap-2 mb-1.5">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">
           {label}
         </span>
+        {icon && <span className="text-sm opacity-80 group-hover:scale-110 transition-transform">{icon}</span>}
       </div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <span style={{ fontSize: 28, fontWeight: 800, color, letterSpacing: '-0.03em' }}>{value}</span>
+
+      <div className="flex items-baseline justify-between gap-2">
+        <span
+          className="text-xl font-extrabold tracking-tight font-mono"
+          style={{ color }}
+        >
+          {value}
+        </span>
         {delta && (
-          <span style={{ fontSize: 11, fontWeight: 700, color: delta.positive ? '#22C55E' : '#F87171' }}>
+          <span
+            className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${
+              delta.positive
+                ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30'
+                : 'bg-rose-950/80 text-rose-400 border border-rose-500/30'
+            }`}
+          >
             {delta.positive ? '↑' : '↓'} {Math.abs(delta.value)}%
           </span>
         )}

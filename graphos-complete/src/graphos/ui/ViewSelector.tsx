@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import type { ViewName } from '@council/graphos';
 
 export const VIEW_TABS: { key: ViewName; label: string; icon: string; question: string }[] = [
@@ -11,12 +12,12 @@ export const VIEW_TABS: { key: ViewName; label: string; icon: string; question: 
   { key: 'auditor', label: 'Auditor', icon: '🔍', question: 'Reconstrua a decisão' },
   { key: 'board', label: 'Board', icon: '🏛️', question: 'Onde está o risco?' },
   { key: 'constitutional', label: 'Constitutional', icon: '📜', question: 'Constituição respeitada?' },
-  { key: 'ecosystem', label: 'Agent Ecosystem', icon: '🌐', question: 'Quais agentes?' },
-  { key: 'certification', label: 'Certification', icon: '📜', question: 'Posso emitir o certificado?' },
-  { key: 'ai_act', label: 'AI Act', icon: '🤖', question: 'Este sistema entra no AI Act?' },
-  { key: 'agent_governance', label: 'Agent Gov', icon: '📋', question: 'Quem governa os agentes?' },
-  { key: 'data_lineage', label: 'Data Lineage', icon: '🧬', question: 'Para onde os dados vão?' },
-  { key: 'risk_propagation', label: 'Risk Prop', icon: '💥', question: 'O que acontece se falhar?' },
+  { key: 'ecosystem', label: 'Ecosystem', icon: '🌐', question: 'Quais agentes?' },
+  { key: 'certification', label: 'Certification', icon: '🏅', question: 'Certificação CG-AG' },
+  { key: 'ai_act', label: 'EU AI Act', icon: '🤖', question: 'Classificação AI Act' },
+  { key: 'agent_governance', label: 'Agent Gov', icon: '📋', question: 'Ciclo de vida dos agentes' },
+  { key: 'data_lineage', label: 'Lineage', icon: '🧬', question: 'Linhagem de dados' },
+  { key: 'risk_propagation', label: 'Risk Prop', icon: '💥', question: 'Propagação de risco' },
 ];
 
 interface ViewSelectorProps {
@@ -26,67 +27,27 @@ interface ViewSelectorProps {
 
 export default function ViewSelector({ active, onSelect }: ViewSelectorProps) {
   return (
-    <>
-      <style>{`
-        .view-selector-container::-webkit-scrollbar {
-          display: none;
-        }
-        .view-selector-container {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
-      <div
-        className="view-selector-container"
-        style={{
-          display: 'flex',
-          gap: 4,
-          padding: 4,
-          background: '#0F1219',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 12,
-          overflow: 'auto',
-          flexWrap: 'nowrap',
-        }}
-      >
-      {VIEW_TABS.map(tab => {
-        const isActive = tab.key === active;
-        return (
-          <button
-            key={tab.key}
-            onClick={() => onSelect(tab.key)}
-            title={tab.question}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '8px 14px',
-              borderRadius: 8,
-              border: 'none',
-              background: isActive ? 'rgba(14,207,184,0.1)' : 'transparent',
-              color: isActive ? '#0ECFB8' : '#6B7A95',
-              fontSize: 11,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.15s',
-              fontFamily: 'inherit',
-            }}
-            onMouseEnter={e => {
-              if (!isActive) e.currentTarget.style.color = '#F0F4FA';
-            }}
-            onMouseLeave={e => {
-              if (!isActive) e.currentTarget.style.color = '#6B7A95';
-            }}
-          >
-            <span style={{ fontSize: 14 }}>{tab.icon}</span>
-            {tab.label}
-          </button>
-        );
-      })}
+    <div className="w-full overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-[#0F1219]/90 border border-white/10 backdrop-blur-xl shadow-xl w-max min-w-full">
+        {VIEW_TABS.map((tab) => {
+          const isActive = tab.key === active;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => onSelect(tab.key)}
+              title={tab.question}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap ${
+                isActive
+                  ? 'bg-gradient-to-r from-[#0ECFB8]/20 to-[#5B50F0]/20 text-[#0ECFB8] border border-[#0ECFB8]/50 shadow-md shadow-cyan-950/40 scale-[1.02]'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent'
+              }`}
+            >
+              <span className="text-sm">{tab.icon}</span>
+              <span className="tracking-wide uppercase text-[11px]">{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
-    </>
   );
 }
