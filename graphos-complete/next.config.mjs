@@ -1,11 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    swcMinify: true,
     // pdfkit precisa dos .afm font files do node_modules — não pode ser bundlado
-    experimental: {
-        serverComponentsExternalPackages: ['pdfkit'],
-    },
+    serverExternalPackages: ['pdfkit'],
     // Security Headers
     async headers() {
         return [

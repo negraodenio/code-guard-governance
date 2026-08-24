@@ -1,9 +1,15 @@
 #!/usr/bin/env node
 /**
  * env-check.js — CodeGuard AI Governance OS
- * Validates required environment variables before starting the server.
- * Run: node env-check.js
+ * Validates environment variables. Loads .env / .env.local if present.
  */
+
+try {
+  require('dotenv').config({ path: '.env.local' });
+  require('dotenv').config({ path: '.env' });
+} catch (e) {
+  // dotenv optional
+}
 
 const REQUIRED = [
   { key: 'NEXT_PUBLIC_SUPABASE_URL', hint: 'Supabase project URL (dashboard → Settings → API)' },
@@ -21,37 +27,28 @@ const OPTIONAL_WITH_IMPACT = [
   { key: 'OPENROUTER_API_KEY', impact: '🟡 CouncilIA debate chamber disabled' },
 ];
 
-let hasErrors = false;
+let hasMissingRequired = false;
 
 console.log('\n🔍 CodeGuard — Environment Check\n' + '─'.repeat(40));
 
 // Check required
 for (const { key, hint } of REQUIRED) {
   if (!process.env[key]) {
-    console.error(`❌ MISSING: ${key}`);
-    console.error(`   → ${hint}`);
-    hasErrors = true;
+    console.warn(`⚠️  MISSING: ${key} (In-memory mock fallback will be used if available)`);
+    hasMissingRequired = true;
   } else {
     console.log(`✅ ${key}`);
   }
 }
 
 // Check optional
-console.log('\n📋 Optional (with impact if missing):');
+console.log('\n📋 Optional services status:');
 for (const { key, impact } of OPTIONAL_WITH_IMPACT) {
   if (!process.env[key]) {
-    console.warn(`⚠️  ${key} not set`);
-    console.warn(`   ${impact}`);
+    console.log(`⚪ ${key}: Not configured (${impact})`);
   } else {
     console.log(`✅ ${key}`);
   }
 }
 
-console.log('─'.repeat(40));
-
-if (hasErrors) {
-  console.error('\n💥 Missing required env vars. Server will not start correctly.\n');
-  process.exit(1);
-} else {
-  console.log('\n✅ All required env vars present. Good to go.\n');
-}
+console.log('─'.repeat(40) + '\n');

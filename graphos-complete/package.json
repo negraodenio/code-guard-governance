@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "env:check": "node scripts/env-check.js",
-    "predev": "node scripts/env-check.js || true"
+    "predev": "node scripts/env-check.js"
   },
 
   "engines": {
