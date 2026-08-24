@@ -1,6 +1,5 @@
 import type { ScannerResult } from './types';
-import type { GraphEntity, AgentNode, ToolNode, ExternalSystemNode, DataAssetNode, ModelNode, RiskNode, RegulationNode, EvidenceNode, OwnerNode, PromptNode } from '@council/graphos/types/entities';
-import type { Relationship } from '@council/graphos/types/relationships';
+import type { GraphEntity, AgentNode, ToolNode, ExternalSystemNode, DataAssetNode, ModelNode, RiskNode, RegulationNode, EvidenceNode, OwnerNode, PromptNode, Relationship } from './graph-engine';
 import { estimateModelCost } from './model-parser';
 
 const COST_PER_TOKEN: Record<string, number> = {

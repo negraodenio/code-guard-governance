@@ -3,7 +3,7 @@ export interface ScannerRequest {
   branch?: string;
   githubToken?: string;
   /** Optional: force a specific provider instead of auto-detect from URL. */
-  provider?: import('@council/scanner').SourceProvider;
+  provider?: import('../connectors/types').SourceProvider;
   /** Required for self-hosted providers (GitLab CE, Gitea, Forgejo). */
   baseUrl?: string;
   /** For Azure DevOps: organisation name. */
@@ -44,9 +44,9 @@ export interface ScannerResult {
   agentClassifications?: import('./classifier').AgentClassification[];
   aiActSummary?: import('./classifier').RepoAIActSummary;
   /** CI/CD pipelines detected (file-based). */
-  cicd?: import('@council/scanner').CiCdSignal[];
+  cicd?: import('../connectors/types').CiCdSignal[];
   /** Cloud AI infrastructure declarations from IaC files. */
-  iacAi?: import('@council/scanner').IacAiSignal[];
+  iacAi?: import('../connectors/types').IacAiSignal[];
 }
 
 export interface RepoMetadata {

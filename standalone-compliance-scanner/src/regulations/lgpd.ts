@@ -97,7 +97,7 @@ RIPD - RELATÓRIO DE IMPACTO À PROTEÇÃO DE DADOS PESSOAIS
 Atividade: ${processingActivity}
 Data: ${new Date().toISOString()}
 Controlador: CouncilIA / ia4all.eu
-DPO: dpo@councilia.com
+DPO: dpo@aegisgov.ai
 
 1. DESCRIÇÃO DO TRATAMENTO
    - Finalidade: Análise estruturada de decisões com IA

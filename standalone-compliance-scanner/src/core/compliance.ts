@@ -1,9 +1,8 @@
 import type { ComplianceAnalysis, ApplicableRegulation, PackageAnalysis, SourceAnalysis, DetectedRisk, ConfigAnalysis } from './types';
-import { GDPRComplianceManager } from '@/lib/compliance/gdpr';
-import { LGPDComplianceManager } from '@/lib/compliance/lgpd';
-import { generateRIPD } from '@/lib/compliance/lgpd';
-import { BCB4893Compliance } from '@/lib/compliance/bcb-4893';
-import { AnvisaComplianceManager } from '@/lib/compliance/anvisa';
+import { GDPRComplianceManager } from '../regulations/gdpr';
+import { LGPDComplianceManager, generateRIPD } from '../regulations/lgpd';
+import { BCB4893Compliance } from '../regulations/bcb-4893';
+import { AnvisaComplianceManager } from '../regulations/anvisa';
 
 function detectDomain(source: SourceAnalysis): 'healthcare' | 'finance' | 'government' | 'corporate' | 'general' {
   const healthcareKeywords = /phq9|copsoq|clinical|voice_recordings|sos_messages|care_referrals|saude|paciente|terapia|hospital/i;

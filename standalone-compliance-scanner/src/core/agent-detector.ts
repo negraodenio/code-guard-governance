@@ -168,5 +168,63 @@ export function buildAgentsFromFrameworkMatches(
     }
   }
 
+export async function detectConfigAgents(
+  files: Array<{ path: string; name: string; type: 'file' }>,
+  getContent: (path: string) => Promise<string>,
+): Promise<DetectedAgent[]> {
+  const agents: DetectedAgent[] = [];
+  for (const f of files) {
+    const filename = f.path.split('/').pop()?.toLowerCase() || '';
+    const content = await getContent(f.path);
+    if (!content) continue;
+
+    if (filename.includes('mcp') || filename.endsWith('config.json')) {
+      try {
+        const parsed = JSON.parse(content);
+        const servers = parsed.mcpServers || parsed.servers || {};
+        for (const serverName of Object.keys(servers)) {
+          agents.push({
+            name: `MCP_Server_${serverName}`,
+            type: 'service',
+            tools: ['MCP', serverName],
+            models: [],
+            riskLevel: 'medium',
+            critical: false,
+            framework: 'Model Context Protocol (MCP)',
+            oversightLevel: 'l2_human_review',
+            isAutonomous: false,
+            confidence: 90,
+          });
+        }
+      } catch {}
+    } else if (filename === 'claude.md' || filename === 'agents.md' || filename === 'agent.md') {
+      agents.push({
+        name: `Agent_${filename.replace(/\.[^.]+$/, '')}`,
+        type: 'ai_persona',
+        tools: ['System Instructions'],
+        models: ['Anthropic / Claude'],
+        riskLevel: 'medium',
+        critical: false,
+        framework: 'Declared Agent Instructions',
+        oversightLevel: 'l2_human_review',
+        isAutonomous: false,
+        confidence: 85,
+      });
+    } else if (filename === '.cursorrules' || filename.includes('cursor')) {
+      agents.push({
+        name: 'Cursor_Rules_Agent',
+        type: 'service',
+        tools: ['IDE Rules'],
+        models: [],
+        riskLevel: 'low',
+        critical: false,
+        framework: 'Cursor IDE Agent',
+        oversightLevel: 'l1_automated',
+        isAutonomous: false,
+        confidence: 80,
+      });
+    }
+  }
   return agents;
 }
+

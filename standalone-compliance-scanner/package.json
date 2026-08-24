@@ -1,13 +1,13 @@
 {
-  "name": "@codeguard/compliance-scanner",
+  "name": "aegisgov-ai-scanner",
   "version": "1.0.0",
-  "description": "Standalone Enterprise AI & Compliance Repository Scanner supporting 13 Regulations (EU AI Act, LGPD, GDPR, BCB 4893, ANVISA, NIST, ISO 42001, OWASP, DORA, NIS2, CG-AG)",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "Standalone Enterprise AI & Compliance Repository Scanner supporting 13 Regulations",
+  "type": "module",
   "scripts": {
-    "build": "tsc",
-    "scan": "ts-node src/cli.ts",
-    "test": "jest"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "ai-governance",
@@ -17,16 +17,28 @@
     "lgpd",
     "gdpr",
     "shadow-ai",
-    "iso42001"
+    "iso42001",
+    "siliconflow"
   ],
-  "author": "CodeGuard Governance",
-  "license": "Proprietary",
+  "author": "AegisGov AI",
+  "license": "MIT",
   "dependencies": {
-    "@octokit/rest": "^20.0.2",
-    "dotenv": "^16.4.5"
+    "canvas-confetti": "^1.9.4",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.475.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20.11.0",
-    "typescript": "^5.3.3"
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.3.3",
+    "vite": "^5.4.14"
   }
 }

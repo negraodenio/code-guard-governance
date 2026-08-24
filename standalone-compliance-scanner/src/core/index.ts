@@ -12,9 +12,8 @@ import { inferTrustZone } from './enrichment/trust-zone';
 import { classifyAllAgents, summarizeAIAct } from './classifier';
 import type { AgentClassification, RepoAIActSummary } from './classifier';
 import { estimateModelCost } from './model-parser';
-import { detectCiCd, detectIacAi, getConnectorForUrl, buildConfig } from '@council/scanner';
-import { GraphEngine } from '@council/graphos';
-import { cacheScannerResult } from '@/graphos/scanner-cache';
+import { detectCiCd, detectIacAi, getConnectorForUrl, buildConfig } from '../connectors';
+import { GraphEngine } from './graph-engine';
 
 const KEY_FILES = [
   'package.json', 'tsconfig.json', '.eslintrc.js', '.eslintrc.json', '.eslintrc',
@@ -127,7 +126,7 @@ export async function discoverRepo(request: ScannerRequest): Promise<ScannerResu
   // ── Config-file agent detection (MCP, Claude Code, Cursor Origin, agents.md, opencode) ──
   // Agents declared in config files: definitive detection by path + parse.
   try {
-    const { detectConfigAgents } = await import('@council/scanner');
+    const { detectConfigAgents } = await import('./agent-detector');
     const configFilePattern = /(^|\/)(\.mcp\.json|mcp\.json|claude_desktop_config\.json|mcp_config\.json|CLAUDE\.md|AGENTS?\.md|opencode\.jsonc?|\.cursorrules)$|(^|\/)\.(claude|cursor|opencode)\//i;
     const configPaths = fileNames.filter(p => configFilePattern.test(p)).slice(0, 30);
     for (const p of configPaths) {
@@ -142,19 +141,7 @@ export async function discoverRepo(request: ScannerRequest): Promise<ScannerResu
     );
     for (const ca of configAgents) {
       if (source.agents.some(a => a.name === ca.name)) continue;
-      source.agents.push({
-        name: ca.name,
-        type: 'service',
-        tools: ca.capabilities,
-        models: [],
-        riskLevel: (['low', 'medium', 'high', 'critical'].includes(ca.suggestedRiskLevel) ? ca.suggestedRiskLevel : 'medium') as 'low' | 'medium' | 'high' | 'critical',
-        critical: false,
-        framework: ca.framework,
-        oversightLevel: ca.suggestedOversightLevel,
-        isAutonomous: ca.isAutonomous,
-        confidence: ca.confidence,
-        filePath: ca.filePath,
-      });
+      source.agents.push(ca);
     }
   } catch (e) {
     console.warn('[Scanner] Config-agent detection skipped:', e instanceof Error ? e.message : e);
@@ -265,9 +252,6 @@ export async function discoverRepo(request: ScannerRequest): Promise<ScannerResu
   const graphosEngine = new GraphEngine();
   for (const e of entities) graphosEngine.addEntity(e);
   for (const r of relationships) graphosEngine.addRelationship(r);
-
-  // ── Auto-save to scanner cache so all downstream consumers get real data ──
-  cacheScannerResult(repoUrl, graphosEngine, result);
 
   return { ...result, graphosEngine };
 }

@@ -24,7 +24,7 @@ export interface AIActCompliance {
 }
 
 export class GDPRComplianceManager {
-  private dpoEmail = 'dpo@councilia.com';
+  private dpoEmail = 'dpo@aegisgov.ai';
 
   classifyAIRisk(
     domain: 'healthcare' | 'government' | 'finance' | 'corporate' | 'general',

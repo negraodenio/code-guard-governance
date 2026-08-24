@@ -1,9 +1,9 @@
-﻿import { createAdminClient } from '@/lib/supabase/admin';
+// In-memory compliance storage fallback
+const memoryStore = new Map<string, any>();
+const supabase = () => null as any;
+const hasSupabaseConfig = () => false;
 
-const supabase = () => createAdminClient();
-const hasSupabaseConfig = () => Boolean((process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) && process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-// â”€â”€ Consents â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ────────────────────────────────────────────────────────────────────────
 
 export async function verifyConsentInDb(consentId: string, userId: string, purposes: string[]): Promise<boolean> {
   if (!hasSupabaseConfig()) return false;
