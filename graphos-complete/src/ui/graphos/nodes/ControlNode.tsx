@@ -17,8 +17,11 @@ export const ControlNode = memo(({ data, selected }: NodeProps) => {
   const isCgAg = d.label.toUpperCase().includes('CG-AG') || d.label.toUpperCase().includes('CONTROL');
 
   return (
-    <div style={{
-      width: 270, borderRadius: 18, padding: '14px 16px',
+    <div
+      role="img"
+      aria-label={`Controle de governança: ${d.label}. Framework: CG-AG.`}
+      style={{
+        width: 270, borderRadius: 18, padding: '14px 16px',
       background: 'linear-gradient(150deg, #0d1c13 0%, #070e0a 100%)',
       border: selected ? '2px solid #22c55e' : '1px solid rgba(255,255,255,0.12)',
       boxShadow: selected

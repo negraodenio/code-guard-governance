@@ -1,6 +1,7 @@
 'use client';
 
 import React, { memo } from 'react';
+// WCAG 2.1 AA: role + aria-label on every node for screen readers
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 
 export interface AgentNodeData {
@@ -38,6 +39,8 @@ export const AgentNode = memo(({ data, selected }: NodeProps) => {
 
   return (
     <div
+      role="img"
+      aria-label={`Agente: ${d.label}. Risco: ${risk}. Score CG-AG: ${score}%. ${hasPii ? 'Acessa PII.' : ''}`}
       style={{
         width: 310,
         borderRadius: 18,
@@ -52,6 +55,7 @@ export const AgentNode = memo(({ data, selected }: NodeProps) => {
         transition: 'box-shadow 0.25s, border-color 0.25s',
         cursor: 'pointer',
       }}
+
     >
       {/* Top accent glow line */}
       <div style={{

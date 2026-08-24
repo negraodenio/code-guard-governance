@@ -26,7 +26,10 @@ export const GenericNode = memo(({ data, selected }: NodeProps) => {
   const emoji = d.emoji || typeEmoji[typeStr] || '📌';
 
   return (
-    <div style={{
+    <div
+      role="img"
+      aria-label={`${typeLabel}: ${d.label}.`}
+      style={{
       width: 240, borderRadius: 16, padding: '12px 14px',
       background: 'linear-gradient(150deg, #0e1420 0%, #080a12 100%)',
       border: selected ? `2px solid ${nodeColor}` : '1px solid rgba(255,255,255,0.1)',
@@ -37,6 +40,7 @@ export const GenericNode = memo(({ data, selected }: NodeProps) => {
       fontFamily: "'DM Sans', -apple-system, sans-serif",
       cursor: 'pointer',
     }}>
+
       <div style={{ position: 'absolute', top: 0, left: 18, right: 18, height: 1.5, borderRadius: 999, background: `linear-gradient(90deg, transparent, ${nodeColor}, transparent)` }} />
 
       <Handle type="target" position={Position.Left} style={{ width: 10, height: 10, background: nodeColor, border: '2px solid #080a12', borderRadius: '50%', left: -5 }} />

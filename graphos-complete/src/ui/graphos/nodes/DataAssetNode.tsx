@@ -24,7 +24,10 @@ export const DataAssetNode = memo(({ data, selected }: NodeProps) => {
     d.subtitle?.toLowerCase().includes('pii');
 
   return (
-    <div style={{
+    <div
+      role="img"
+      aria-label={`Dado: ${d.label}.${hasPii ? ' Contém PII — sujeito à LGPD.' : ''}`}
+      style={{
       width: 270, borderRadius: 18, padding: '14px 16px',
       background: 'linear-gradient(150deg, #1a0f26 0%, #0c0812 100%)',
       border: selected ? '2px solid #a855f7' : '1px solid rgba(255,255,255,0.12)',

@@ -25,7 +25,10 @@ export const RiskNode = memo(({ data, selected }: NodeProps) => {
   const cfg = severityMap[severity] || severityMap.high;
 
   return (
-    <div style={{
+    <div
+      role="img"
+      aria-label={`Risco: ${d.label}. Gravidade: ${severity}.`}
+      style={{
       width: 270, borderRadius: 18, padding: '14px 16px',
       background: cfg.card,
       border: selected ? `2px solid ${cfg.color}` : '1px solid rgba(255,255,255,0.12)',

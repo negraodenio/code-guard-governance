@@ -6,8 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "env:check": "node scripts/env-check.js",
+    "predev": "node scripts/env-check.js || true"
   },
+
   "engines": {
     "node": ">=22.x"
   },
